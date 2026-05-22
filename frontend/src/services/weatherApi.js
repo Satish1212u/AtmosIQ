@@ -1,7 +1,10 @@
 import axios from 'axios';
 
 // Backend API URL
-const API_URL = 'https://atmosiq-18gz.onrender.com';
+const API_URL = 'https://atmosiq-18gz.onrender.com/api/v1';
+
+const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
+const BASE_URL = 'https://api.openweathermap.org/data/2.5';
 
 // Fallback mock data
 const MOCK_WEATHER = {
@@ -21,144 +24,104 @@ const MOCK_WEATHER = {
   }
 };
 
-// WEATHER
+// WEATHER (Uses backend API route)
 export const fetchWeather = async (city) => {
-
   try {
-
     const response = await axios.get(
-      `${API_URL}/api/weather/${city}`
+      `${API_URL}/weather/${city}`
     );
-
     return response.data;
-
   } catch (error) {
-
     console.error('Error fetching weather:', error);
-
     return {
       ...MOCK_WEATHER,
       name: city || 'Mock City'
     };
-
   }
-
 };
 
-// FORECAST
+// FORECAST (Direct OpenWeather API)
 export const fetchForecast = async (city) => {
-
-  try {
-
-    const response = await axios.get(
-      `${API_URL}/api/forecast/${city}`
-    );
-
-    return response.data;
-
-  } catch (error) {
-
-    console.error('Error fetching forecast:', error);
-
+  if (!API_KEY) {
     return {
       list: Array(40)
         .fill(MOCK_WEATHER)
         .map((w, i) => ({
           ...w,
-          dt_txt: new Date(
-            Date.now() + i * 10800000
-          ).toISOString()
+          dt_txt: new Date(Date.now() + i * 10800000).toISOString()
         }))
     };
-
   }
 
+  try {
+    const response = await axios.get(`${BASE_URL}/forecast`, {
+      params: {
+        q: city,
+        appid: API_KEY,
+        units: 'metric'
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching forecast:", error);
+    throw error;
+  }
 };
 
-// WEATHER BY LOCATION
+// WEATHER BY LOCATION (Direct OpenWeather API)
 export const fetchWeatherByLocation = async (lat, lon) => {
-
-  try {
-
-    const response = await axios.get(
-      `${API_URL}/api/weather/location`,
-      {
-        params: { lat, lon }
-      }
-    );
-
-    return response.data;
-
-  } catch (error) {
-
-    console.error(
-      'Error fetching weather by location:',
-      error
-    );
-
-    return {
-      ...MOCK_WEATHER,
-      name: 'Current Location'
-    };
-
+  if (!API_KEY) {
+    return { ...MOCK_WEATHER, name: 'Current Location' };
   }
 
+  try {
+    const response = await axios.get(`${BASE_URL}/weather`, {
+      params: {
+        lat,
+        lon,
+        appid: API_KEY,
+        units: 'metric'
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching weather by location:", error);
+    throw error;
+  }
 };
 
-// FORECAST BY LOCATION
+// FORECAST BY LOCATION (Direct OpenWeather API)
 export const fetchForecastByLocation = async (lat, lon) => {
-
-  try {
-
-    const response = await axios.get(
-      `${API_URL}/api/forecast/location`,
-      {
-        params: { lat, lon }
-      }
-    );
-
-    return response.data;
-
-  } catch (error) {
-
-    console.error(
-      'Error fetching forecast by location:',
-      error
-    );
-
+  if (!API_KEY) {
     return {
       list: Array(40)
         .fill(MOCK_WEATHER)
         .map((w, i) => ({
           ...w,
-          dt_txt: new Date(
-            Date.now() + i * 10800000
-          ).toISOString()
+          dt_txt: new Date(Date.now() + i * 10800000).toISOString()
         }))
     };
-
   }
 
+  try {
+    const response = await axios.get(`${BASE_URL}/forecast`, {
+      params: {
+        lat,
+        lon,
+        appid: API_KEY,
+        units: 'metric'
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching forecast by location:", error);
+    throw error;
+  }
 };
 
-// AIR QUALITY
+// AIR QUALITY (Direct OpenWeather API)
 export const fetchAirQuality = async (lat, lon) => {
-
-  try {
-
-    const response = await axios.get(
-      `${API_URL}/api/aqi`,
-      {
-        params: { lat, lon }
-      }
-    );
-
-    return response.data;
-
-  } catch (error) {
-
-    console.error('Error fetching AQI:', error);
-
+  if (!API_KEY) {
     return {
       list: [
         {
@@ -172,7 +135,19 @@ export const fetchAirQuality = async (lat, lon) => {
         }
       ]
     };
-
   }
 
+  try {
+    const response = await axios.get(`${BASE_URL}/air_pollution`, {
+      params: {
+        lat,
+        lon,
+        appid: API_KEY
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching AQI:", error);
+    throw error;
+  }
 };

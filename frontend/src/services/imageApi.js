@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
+const BASE_URL = import.meta.env.VITE_API_URL || 'https://atmosiq-18gz.onrender.com/api/v1';
 
 // Simple in-memory cache: key → { imageUrl, photographer, unsplashLink }
 const cache = new Map();

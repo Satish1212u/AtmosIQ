@@ -13,11 +13,10 @@ const httpServer = createServer(app);
 // Initialize Real-time Engine
 initSocket(httpServer);
 
-// Connect to Database only if URI exists
 if (process.env.MONGO_URI) {
   connectDB();
 } else {
-  logger.warn('⚠️ MongoDB URI not found. Skipping database connection.');
+  logger.warn('MongoDB skipped');
 }
 
 const server = httpServer.listen(PORT, () => {

@@ -697,7 +697,7 @@ const Footer = () => {
                             </p>
                             <div className="bg-slate-900 border border-white/5 rounded-xl p-3.5 font-mono text-xs text-slate-300 overflow-x-auto">
                               <p className="text-slate-500 font-bold mb-1.5">// Query parameters: city, weather, isNight, country</p>
-                              curl "http://localhost:5000/api/v1/city-image?city=Delhi&weather=clear"
+                              curl "https://atmosiq-18gz.onrender.com/api/v1/city-image?city=Delhi&weather=clear"
                             </div>
                             <div className="bg-slate-900 border border-white/5 rounded-xl p-3.5 font-mono text-xs text-slate-300 overflow-x-auto space-y-1">
                               <p className="text-slate-500 font-bold mb-1.5">// Response JSON Example:</p>

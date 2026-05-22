@@ -6,7 +6,8 @@ import { catchAsync } from '../middleware/errorMiddleware.js';
  * Supports lat/lon or city query params
  */
 export const getWeather = catchAsync(async (req, res) => {
-  const { lat, lon, city } = req.query;
+  const { lat, lon } = req.query;
+  const city = req.params.city || req.query.city;
 
   const latitude = lat ? parseFloat(lat) : null;
   const longitude = lon ? parseFloat(lon) : null;

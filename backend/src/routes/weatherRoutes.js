@@ -6,6 +6,7 @@ const router = express.Router();
 
 // General weather report (Current + Forecast + AQI + AI)
 router.get('/', validate(weatherSchemas.getWeather), getWeather);
+router.get('/:city', getWeather);
 
 // AI-focused environmental insights
 router.get('/intelligence', validate(weatherSchemas.getWeather), getWeatherAI);
