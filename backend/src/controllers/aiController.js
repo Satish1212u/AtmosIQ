@@ -50,16 +50,23 @@ export const getTravelAnalysis = catchAsync(async (req, res) => {
 /**
  * Handle conversational AI chat requests by orchestration with Gemini
  */
-export const chatWithAI = catchAsync(async (req, res) => {
-  const { message, weatherData, airQualityData, forecastData } = req.body;
+export const chatWithAI = async (req, res) => {
+  try {
+    const { message, weatherData, airQualityData, forecastData } = req.body;
 
-  if (!message) {
-    return res.status(400).json({
-      success: false,
-      message: 'Message field is required.'
+    if (!message) {
+      return res.status(400).json({
+        success: false,
+        message: 'Message field is required.'
+      });
+    }
+
+    const responsePayload = await handleAIChat(message, weatherData, airQualityData, forecastData);
+    return res.status(200).json(responsePayload);
+  } catch (error) {
+    console.error('AI chat controller error:', error);
+    return res.status(500).json({
+      message: 'AI request failed'
     });
   }
-
-  const responsePayload = await handleAIChat(message, weatherData, airQualityData, forecastData);
-  res.status(200).json(responsePayload);
-});
+};
