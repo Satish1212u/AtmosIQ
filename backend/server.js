@@ -13,8 +13,12 @@ const httpServer = createServer(app);
 // Initialize Real-time Engine
 initSocket(httpServer);
 
-// Connect to Database
-connectDB();
+// Connect to Database only if URI exists
+if (process.env.MONGO_URI) {
+  connectDB();
+} else {
+  logger.warn('⚠️ MongoDB URI not found. Skipping database connection.');
+}
 
 const server = httpServer.listen(PORT, () => {
   logger.info(`🚀 AtmosIQ Climate Intelligence Core running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
