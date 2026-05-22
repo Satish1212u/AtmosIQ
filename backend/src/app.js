@@ -14,7 +14,6 @@ import authRoutes from './routes/authRoutes.js';
 import aiRoutes from './routes/aiRoutes.js';
 import weatherRoutes from './routes/weatherRoutes.js';
 import userRoutes from './routes/userRoutes.js';
-import imageRoutes from './routes/imageRoutes.js';
 
 const app = express();
 
@@ -53,7 +52,6 @@ app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/ai', aiRoutes);
 app.use('/api/v1/weather', weatherRoutes);
 app.use('/api/v1/users', userRoutes);
-app.use('/api/v1/city-image', imageRoutes);
 
 // Health Check
 app.get('/health', (req, res) => {

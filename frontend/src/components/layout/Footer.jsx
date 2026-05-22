@@ -354,7 +354,7 @@ const Footer = () => {
                         Proxied API Connections
                       </h4>
                       <p className="text-xs text-slate-300 leading-relaxed font-semibold">
-                        All third-party requests to OpenWeather and Unsplash are tunneled through secure Express proxies. Your IP and personal metadata are never exposed to external vendors.
+                        All third-party weather API requests are tunneled through secure Express proxies. Your IP and personal metadata are never exposed to external vendors.
                       </p>
                     </div>
                   </div>
@@ -409,9 +409,9 @@ const Footer = () => {
                     <div className="flex gap-4">
                       <div className="w-6 h-6 rounded-full bg-slate-900 border border-white/15 flex items-center justify-center shrink-0 font-bold text-xs text-cyan-400">3</div>
                       <div>
-                        <h4 className="text-sm font-bold text-white mb-1">Third-Party Attribution</h4>
+                        <h4 className="text-sm font-bold text-white mb-1">Attribution & Local Renders</h4>
                         <p className="text-xs text-slate-300 leading-relaxed font-semibold">
-                          Weather data is fetched from the OpenWeatherMap API arrays. Cities and weather conditions are synchronized with creative commons high-resolution landscape photography sourced dynamically through the Unsplash API system.
+                          Weather data is fetched from OpenWeatherMap API arrays. Atmospheric backdrops and animated climate systems are computed dynamically offline on the client side using specialized CSS frameworks.
                         </p>
                       </div>
                     </div>
@@ -528,12 +528,12 @@ const Footer = () => {
                       <div className="flex items-center gap-3">
                         <Globe className="w-5 h-5 text-cyan-400" />
                         <div>
-                          <p className="text-sm font-bold text-white leading-none">Unsplash Location Image Engine</p>
-                          <p className="text-[10px] text-slate-300 font-bold uppercase mt-1">Proxy Cache: 1h TTL · Scoring System Active</p>
+                          <p className="text-sm font-bold text-white leading-none">Atmosphere Particle Render Engine</p>
+                          <p className="text-[10px] text-slate-300 font-bold uppercase mt-1">Dynamic Offline Shader Systems · Particles Active</p>
                         </div>
                       </div>
                       <span className="text-xs font-bold text-emerald-400 flex items-center gap-1.5 font-mono px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-                        Operational • 99.97%
+                        Operational • 100.00%
                       </span>
                     </div>
 
@@ -682,31 +682,30 @@ const Footer = () => {
                           Secure API Core Endpoints
                         </h3>
                         <p className="text-sm text-slate-200 leading-relaxed font-semibold font-sans">
-                          Our backend proxy hides all third-party developer secrets. No API keys ever cross the client. We expose secure Express gateways for location images and conversational AI:
+                          Our backend proxy hides all third-party developer secrets. No API keys ever cross the client. We expose secure Express gateways for real-time conversational AI and localized climate intelligence:
                         </p>
 
                         <div className="space-y-6 mt-4">
                           {/* Endpoint 1 */}
                           <div className="p-5 rounded-2xl bg-slate-950/70 border border-white/10 space-y-3 font-semibold">
                             <div className="flex items-center gap-3">
-                              <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-xl text-[10px] font-black uppercase tracking-wider font-mono">GET</span>
-                              <span className="text-sm font-mono text-white">/api/v1/city-image</span>
+                              <span className="px-3 py-1 bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 rounded-xl text-[10px] font-black uppercase tracking-wider font-mono">POST</span>
+                              <span className="text-sm font-mono text-white">/api/v1/ai/chat</span>
                             </div>
                             <p className="text-xs text-slate-300">
-                              Fetches optimized city imagery matching current weather metrics. Results are automatically cached in the backend memory for 1 hour.
+                              Routes conversational prompts to the Gemini model cascade, processing local weather context parameters to generate personalized dynamic climate insights.
                             </p>
                             <div className="bg-slate-900 border border-white/5 rounded-xl p-3.5 font-mono text-xs text-slate-300 overflow-x-auto">
-                              <p className="text-slate-500 font-bold mb-1.5">// Query parameters: city, weather, isNight, country</p>
-                              curl "https://atmosiq-18gz.onrender.com/api/v1/city-image?city=Delhi&weather=clear"
+                              <p className="text-slate-500 font-bold mb-1.5">// Payload: message, weatherContext</p>
+                              {`curl -X POST "https://atmosiq-18gz.onrender.com/api/v1/ai/chat" \\
+                                -H "Content-Type: application/json" \\
+                                -d '{ "message": "Should I go out today?", "weatherContext": { "temp": 28, "condition": "Clear" } }'`}
                             </div>
                             <div className="bg-slate-900 border border-white/5 rounded-xl p-3.5 font-mono text-xs text-slate-300 overflow-x-auto space-y-1">
                               <p className="text-slate-500 font-bold mb-1.5">// Response JSON Example:</p>
                               <pre className="text-cyan-300">{`{
   "success": true,
-  "city": "Delhi",
-  "imageUrl": "https://images.unsplash.com/photo-152396...",
-  "photographer": "Annie Spratt",
-  "unsplashLink": "https://unsplash.com/photos/..."
+  "response": "With clear skies and temperatures at a comfortable 28°C, it's a perfect day for outdoor activities. Just remember sunscreen!"
 }`}</pre>
                             </div>
                           </div>

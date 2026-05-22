@@ -149,9 +149,9 @@ const Home = () => {
   return (
     <div className="relative min-h-[calc(100vh-80px)] flex flex-col lg:flex-row items-center justify-center px-6 lg:px-16 xl:px-24 overflow-hidden gap-12 lg:gap-20 z-10 bg-transparent">
 
-      {/* ══ CITY HERO BACKGROUND IMAGE ══
-          Full-screen real city photo from Unsplash, synchronized with
-          current weather condition. Crossfades on city/condition change. */}
+      {/* ══ CITY HERO BACKGROUND ══
+          Full-screen cinematic animated climate backdrops and dynamic particle
+          systems synchronized with current weather condition. */}
       <div className="absolute inset-0 z-0">
         <CityHeroImage
           city={weather.name}

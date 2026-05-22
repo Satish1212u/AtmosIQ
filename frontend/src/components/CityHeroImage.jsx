@@ -1,11 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, ExternalLink } from 'lucide-react';
-import { fetchCityImageUrl } from '../services/imageApi';
+import React from 'react';
+import { motion } from 'framer-motion';
 
 /* ══════════════════════════════════════════════════════════
    Weather condition → overlay CSS/animation config
-══════════════════════════════════════════════════════════ */
+   ══════════════════════════════════════════════════════════ */
 const getWeatherOverlay = (condition, isNight) => {
   const c = (condition || 'clear').toLowerCase();
 
@@ -69,7 +67,7 @@ const getWeatherOverlay = (condition, isNight) => {
 
 /* ══════════════════════════════════════════════════════════
    RAIN PARTICLES
-══════════════════════════════════════════════════════════ */
+   ══════════════════════════════════════════════════════════ */
 const RainParticles = () => (
   <div className="absolute inset-0 overflow-hidden pointer-events-none">
     <style dangerouslySetInnerHTML={{ __html: `
@@ -101,7 +99,7 @@ const RainParticles = () => (
 
 /* ══════════════════════════════════════════════════════════
    SNOW PARTICLES
-══════════════════════════════════════════════════════════ */
+   ══════════════════════════════════════════════════════════ */
 const SnowParticles = () => (
   <div className="absolute inset-0 overflow-hidden pointer-events-none">
     <style dangerouslySetInnerHTML={{ __html: `
@@ -130,7 +128,7 @@ const SnowParticles = () => (
 
 /* ══════════════════════════════════════════════════════════
    STARS (NIGHT)
-══════════════════════════════════════════════════════════ */
+   ══════════════════════════════════════════════════════════ */
 const StarParticles = () => (
   <div className="absolute inset-0 overflow-hidden pointer-events-none">
     {Array.from({ length: 30 }).map((_, i) => (
@@ -155,7 +153,7 @@ const StarParticles = () => (
 
 /* ══════════════════════════════════════════════════════════
    SUN BLOOM (CLEAR DAY)
-══════════════════════════════════════════════════════════ */
+   ══════════════════════════════════════════════════════════ */
 const SunBloom = () => (
   <div className="absolute inset-0 overflow-hidden pointer-events-none">
     <motion.div
@@ -169,7 +167,7 @@ const SunBloom = () => (
 
 /* ══════════════════════════════════════════════════════════
    FOG OVERLAY
-══════════════════════════════════════════════════════════ */
+   ══════════════════════════════════════════════════════════ */
 const FogOverlay = () => (
   <motion.div
     animate={{ opacity: [0.3, 0.6, 0.3] }}
@@ -179,37 +177,10 @@ const FogOverlay = () => (
 );
 
 /* ══════════════════════════════════════════════════════════
-   MAIN CITY HERO IMAGE COMPONENT
-══════════════════════════════════════════════════════════ */
+   MAIN CITY HERO IMAGE COMPONENT (Offline gradients + particles)
+   ══════════════════════════════════════════════════════════ */
 const CityHeroImage = ({ city, country, condition, isNight, className = '' }) => {
-  const [imageData, setImageData] = useState(null);    // { imageUrl, photographer, unsplashLink }
-  const [loaded, setLoaded] = useState(false);
-  const [error, setError] = useState(false);
-  const [prevUrl, setPrevUrl] = useState(null);
-  const lastFetchKey = useRef('');
-
   const overlay = getWeatherOverlay(condition, isNight);
-
-  // Fetch when city / condition / isNight changes
-  useEffect(() => {
-    if (!city) return;
-    const key = `${city}::${condition}::${isNight}`;
-    if (key === lastFetchKey.current) return;
-    lastFetchKey.current = key;
-
-    setLoaded(false);
-    setError(false);
-
-    (async () => {
-      const result = await fetchCityImageUrl(city, condition, isNight, country);
-      if (result?.imageUrl) {
-        setPrevUrl(imageData?.imageUrl || null);
-        setImageData(result);
-      } else {
-        setError(true);
-      }
-    })();
-  }, [city, condition, isNight, country]);
 
   // Fallback gradient when no image available
   const fallbackGradient = isNight
@@ -223,36 +194,13 @@ const CityHeroImage = ({ city, country, condition, isNight, className = '' }) =>
   return (
     <div className={`relative w-full h-full overflow-hidden ${className}`}>
 
-      {/* ── Fallback gradient (always rendered underneath) ── */}
+      {/* ── Dynamic static gradient backdrop ── */}
       <div className={`absolute inset-0 bg-gradient-to-br ${fallbackGradient} transition-all duration-1000`} />
-
-      {/* ── Real city photo with crossfade ── */}
-      <AnimatePresence mode="wait">
-        {imageData?.imageUrl && (
-          <motion.div
-            key={imageData.imageUrl}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: loaded ? 1 : 0 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 1.2, ease: 'easeInOut' }}
-            className="absolute inset-0"
-          >
-            <img
-              src={imageData.imageUrl}
-              alt={`${city} ${condition} cityscape`}
-              onLoad={() => setLoaded(true)}
-              onError={() => { setError(true); setLoaded(false); }}
-              className="w-full h-full object-cover object-center scale-105"
-              style={{ transition: 'transform 8s ease-out', transform: loaded ? 'scale(1)' : 'scale(1.05)' }}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* ── Weather-specific atmospheric tint ── */}
       <div className={`absolute inset-0 ${overlay.tint} transition-all duration-1000 pointer-events-none`} />
 
-      {/* ── Main darkening gradient (always — ensures text readability) ── */}
+      {/* ── Main darkening gradient (ensures text readability) ── */}
       <div className={`absolute inset-0 ${overlay.gradient} pointer-events-none`} />
 
       {/* ── Weather Particles / Atmosphere ── */}
@@ -264,40 +212,6 @@ const CityHeroImage = ({ city, country, condition, isNight, className = '' }) =>
 
       {/* ── Noise texture for cinematic grain ── */}
       <div className="absolute inset-0 bg-[url('/noise.svg')] opacity-15 mix-blend-overlay pointer-events-none" />
-
-      {/* ── Photo credit (bottom-right, subtle) ── */}
-      <AnimatePresence>
-        {imageData?.photographer && loaded && (
-          <motion.a
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ delay: 1.5, duration: 0.6 }}
-            href={imageData.unsplashLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="absolute bottom-3 right-4 flex items-center gap-1.5 text-[10px] text-white/40 hover:text-white/80 transition-colors duration-300 group z-30"
-          >
-            <Camera className="w-3 h-3" />
-            <span>{imageData.photographer} · Unsplash</span>
-            <ExternalLink className="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity" />
-          </motion.a>
-        )}
-      </AnimatePresence>
-
-      {/* ── Loading shimmer (while fetching) ── */}
-      {!loaded && !error && (
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div
-            className="absolute inset-0 -translate-x-full"
-            style={{
-              background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent)',
-              animation: 'shimmer 2s infinite',
-            }}
-          />
-          <style dangerouslySetInnerHTML={{ __html: '@keyframes shimmer { to { transform: translateX(200%); } }' }} />
-        </div>
-      )}
     </div>
   );
 };
