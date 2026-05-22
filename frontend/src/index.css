@@ -1,0 +1,94 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+
+@theme {
+  --color-glass: rgba(255, 255, 255, 0.05);
+  --color-glass-border: rgba(255, 255, 255, 0.1);
+  --color-dark-glass: rgba(0, 0, 0, 0.4);
+  
+  --animate-shimmer: shimmer 2s infinite;
+  --animate-blob: blob 7s infinite;
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-pulse-slow: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  
+  @keyframes shimmer {
+    100% {
+      transform: translateX(100%);
+    }
+  }
+  @keyframes blob {
+    0% { transform: translate(0px, 0px) scale(1); }
+    33% { transform: translate(30px, -50px) scale(1.1); }
+    66% { transform: translate(-20px, 20px) scale(0.9); }
+    100% { transform: translate(0px, 0px) scale(1); }
+  }
+  @keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+    100% { transform: translateY(0px); }
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-slate-900/65 backdrop-blur-2xl border border-white/15 shadow-[0_12px_40px_rgba(0,0,0,0.45)];
+  }
+  
+  .glass-dark {
+    @apply bg-slate-950/80 backdrop-blur-3xl border border-white/10 shadow-[0_16px_48px_rgba(0,0,0,0.65)];
+  }
+
+  /* Weather-reactive glassmorphism */
+  .glass-wet {
+    @apply bg-slate-800/70 backdrop-blur-md border border-cyan-300/20 shadow-[0_12px_40px_rgba(8,145,178,0.2)] mix-blend-luminosity;
+    background-image: linear-gradient(to bottom, rgba(255,255,255,0.05), rgba(255,255,255,0));
+  }
+
+  .glass-condensed {
+    @apply bg-slate-200/20 backdrop-blur-[40px] border border-white/30 shadow-[0_12px_40px_rgba(255,255,255,0.1)];
+  }
+
+  .glass-haze {
+    @apply bg-amber-900/40 backdrop-blur-3xl border border-amber-500/10 shadow-[0_12px_40px_rgba(120,53,15,0.4)];
+  }
+
+
+  .text-glow {
+    text-shadow: 0 0 6px rgba(255, 255, 255, 0.45);
+  }
+  
+  .text-glow-cyan {
+    text-shadow: 0 0 8px rgba(34, 211, 238, 0.45);
+  }
+  
+  .magnetic-btn {
+    @apply relative overflow-hidden transition-all duration-300;
+  }
+}
+
+body {
+  margin: 0;
+  font-family: 'Outfit', 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  @apply text-white overflow-x-hidden bg-slate-950;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(56, 189, 248, 0.5);
+}
