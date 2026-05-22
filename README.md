@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🌀 AtmosIQ — Next-Generation Climate Intelligence Platform
 
 AtmosIQ is an enterprise-grade, high-fidelity AI-powered climate intelligence engine providing real-time environmental telemetry, deep air quality indices, and predictive weather simulation analytics. Built using Vite, React, Node.js, Express, and Google Gemini AI model orchestration.
@@ -67,3 +68,7 @@ Ensure you have a `.env` in both `/backend` and `/frontend` directories. See `.e
 │   └── vite.config.js
 └── README.md
 ```
+=======
+# AtmosIQ
+AtmosIQ is an AI-powered Climate Intelligence Platform that combines real-time weather, AQI monitoring, dynamic atmospheric visuals, and smart environmental insights into a futuristic immersive experience.
+>>>>>>> ffad6af8f07d8d0e526b168fad3ce73f79c4e40b

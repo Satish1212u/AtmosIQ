@@ -90,7 +90,6 @@
     "leaflet": "^1.9.4",
     "levn": "^0.4.1",
     "lightningcss": "^1.32.0",
-    "lightningcss-win32-x64-msvc": "^1.32.0",
     "locate-path": "^6.0.0",
     "lru-cache": "^5.1.1",
     "lucide-react": "^1.16.0",
