@@ -24,9 +24,7 @@ app.use(pino({ logger }));
 // 2. Security Middleware
 app.use(helmet());
 app.use(cors({
-  origin: [
-    'https://atmos-iq-chi.vercel.app'
-  ],
+  origin: ['https://atmos-iq-chi.vercel.app'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']

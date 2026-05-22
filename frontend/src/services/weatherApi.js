@@ -1,8 +1,5 @@
 import axios from 'axios';
 
-// Backend API URL
-const API_URL = 'https://atmosiq-18gz.onrender.com/api/v1';
-
 const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
 const BASE_URL = 'https://api.openweathermap.org/data/2.5';
 
@@ -24,19 +21,25 @@ const MOCK_WEATHER = {
   }
 };
 
-// WEATHER (Uses backend API route)
+// WEATHER (Direct OpenWeather API)
 export const fetchWeather = async (city) => {
+  if (!API_KEY) {
+    console.warn("No OpenWeather API key found. Using mock data.");
+    return { ...MOCK_WEATHER, name: city || 'Mock City' };
+  }
+
   try {
-    const response = await axios.get(
-      `${API_URL}/weather/${city}`
-    );
+    const response = await axios.get(`${BASE_URL}/weather`, {
+      params: {
+        q: city,
+        appid: API_KEY,
+        units: 'metric'
+      }
+    });
     return response.data;
   } catch (error) {
-    console.error('Error fetching weather:', error);
-    return {
-      ...MOCK_WEATHER,
-      name: city || 'Mock City'
-    };
+    console.error("Error fetching weather:", error);
+    throw error;
   }
 };
 
