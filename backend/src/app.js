@@ -24,9 +24,12 @@ app.use(pino({ logger }));
 // 2. Security Middleware
 app.use(helmet());
 app.use(cors({
-  origin: "https://atmos-iq-chi.vercel.app",
+  origin: [
+    'https://atmos-iq-chi.vercel.app'
+  ],
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 // 3. Body Parsers
@@ -56,8 +59,8 @@ app.use('/api/v1/city-image', imageRoutes);
 
 // Health Check
 app.get('/health', (req, res) => {
-  res.status(200).json({ 
-    status: 'UP', 
+  res.status(200).json({
+    status: 'UP',
     timestamp: new Date(),
     uptime: process.uptime()
   });
