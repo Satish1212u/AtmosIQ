@@ -330,7 +330,7 @@ const Assistant = () => {
     setIsTyping(true);
 
     const aiResult = await generateAIResponse(textToSend, weather, airQuality, forecast);
-    const aiResponseText = aiResult.response ||
+    const aiResponseText = aiResult.reply ||
       `AtmosIQ AI abhi thoda overloaded hai 🤖  
 Lekin live weather data active hai. ${weather?.name || 'Your area'} me abhi ${weather?.weather?.[0]?.description || 'stable conditions'} hain with temperature around ${Math.round(weather?.main?.temp || 0)}°C.`;
     const visualData = aiResult.visualData || null;

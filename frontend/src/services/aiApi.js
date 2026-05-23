@@ -12,29 +12,42 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://atmosiq-18gz.
  * @param {object} forecastData - Optional active OWM daily/hourly forecast data
  * @returns {Promise<object>} response payload
  */
-export const generateAIResponse = async (prompt, weatherData, airQualityData = null, forecastData = null) => {
+export const generateAIResponse = async (
+  prompt,
+  weatherData,
+  airQualityData = null,
+  forecastData = null
+) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/v1/ai/chat`, {
-      message: prompt,
-      weatherData,
-      airQualityData,
-      forecastData
-    }, {
-      headers: {
-        'Content-Type': 'application/json'
+
+    const response = await axios.post(
+      `${API_BASE_URL}/v1/ai/chat`,
+      {
+        message: prompt,
+        weatherData,
+        airQualityData,
+        forecastData
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        }
       }
-    });
+    );
+
+    console.log("FULL API RESPONSE:", response.data);
 
     return response.data;
+
   } catch (error) {
     let friendlyMessage = "The AI assistant is temporarily unavailable. Please make sure the backend server is running on port 5000.";
-    
+
     if (error.response) {
       const status = error.response.status;
       const data = error.response.data;
-      
+
       console.error(`[AI GATEWAY FAILURE] Server responded with code ${status}:`, data);
-      
+
       if (status === 413) {
         friendlyMessage = "The request was too large to process. Try asking a more specific question.";
       } else if (status === 429) {
@@ -57,7 +70,7 @@ export const generateAIResponse = async (prompt, weatherData, airQualityData = n
     return {
       success: false,
       modelUsed: 'local-frontend-fallback',
-      response: friendlyMessage,
+      reply: friendlyMessage,
       fallbackTriggered: true
     };
   }
