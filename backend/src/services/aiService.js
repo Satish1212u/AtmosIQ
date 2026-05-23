@@ -3,10 +3,10 @@ import logger from '../utils/logger.js';
 import { MODEL_CONFIGS } from '../config/aiModels.js';
 import { ApiError } from '../middleware/errorMiddleware.js';
 import { getFullWeatherReport } from './weather/weatherService.js';
-import { 
-  detectUserIntent, 
+import {
+  detectUserIntent,
   extractCity,
-  fallbackLogic, 
+  fallbackLogic,
   getSystemPrompt,
   getWeeklyForecast,
   getHourlyForecast,
@@ -84,7 +84,7 @@ const buildVisualData = (weatherData, airQualityData, forecastData, intent) => {
   const weekly = getWeeklyForecast(forecastData?.list) || [];
   const hourly = getHourlyForecast(forecastData?.list) || [];
   const aqi = getAQISummary(airQualityData) || { aqiValue: 1, label: 'Good', suggestion: 'Air quality is nominal.' };
-  
+
   // 1. Forecast Card projection array
   const forecast = weekly.map(item => ({
     day: item.day,
@@ -112,20 +112,20 @@ const buildVisualData = (weatherData, airQualityData, forecastData, intent) => {
   const tempVal = weatherData?.main?.temp !== undefined ? Math.round(weatherData.main.temp) : 22;
   const windVal = weatherData?.wind?.speed !== undefined ? weatherData.wind.speed : 4.5;
   const humidityVal = weatherData?.main?.humidity !== undefined ? weatherData.main.humidity : 55;
-  
+
   const insights = {
-    travelSafety: tempVal > 38 || aqi.aqiValue >= 4 
+    travelSafety: tempVal > 38 || aqi.aqiValue >= 4
       ? `Conditions are tough right now. With temperatures at ${tempVal}°C and AQI in the ${aqi.label} category, it's best to minimize outdoor exposure and time your travel carefully.`
       : `Travel conditions look good. Wind is calm at ${windVal} m/s, making commuting comfortable and safe.`,
-    outdoorRecommendation: aqi.aqiValue >= 3 
+    outdoorRecommendation: aqi.aqiValue >= 3
       ? `Air quality is ${aqi.label} right now. It's better to skip intense outdoor workouts and opt for indoor activities instead.`
       : `Conditions are great for outdoor activities. The air is clean and temperature is comfortable — a perfect time to head outside.`,
-    healthAdvisory: aqi.aqiValue >= 4 
+    healthAdvisory: aqi.aqiValue >= 4
       ? `Air quality is poor. Wearing a mask outdoors is strongly recommended, especially for children and those with respiratory conditions.`
       : `Air quality is ${aqi.label}. Breathing conditions are safe and no special precautions are needed.`,
-    clothingSuggestion: tempVal > 30 
+    clothingSuggestion: tempVal > 30
       ? `It's hot outside at ${tempVal}°C. Go for lightweight, breathable clothing and stay hydrated throughout the day.`
-      : tempVal < 15 
+      : tempVal < 15
         ? `It's cool at ${tempVal}°C. A warm jacket or layered clothing is a good idea before heading out.`
         : `The temperature is a comfortable ${tempVal}°C. Light, casual clothing should work perfectly.`,
     rainRisk: condition.toLowerCase().includes('rain') || condition.toLowerCase().includes('drizzle')
@@ -173,7 +173,7 @@ export const handleAIChat = async (message, weatherData, airQualityData, forecas
     try {
       logger.info(`[DYNAMIC RESOLUTION] Mentions different location: "${extractedCity}". Querying backend weather metrics...`);
       const report = await getFullWeatherReport(null, null, extractedCity);
-      
+
       targetWeather = {
         name: report.location.name,
         coord: { lat: report.location.lat, lon: report.location.lon },
@@ -255,49 +255,29 @@ export const handleAIChat = async (message, weatherData, airQualityData, forecas
   // G. Fallback Cascade Loop
   let fallbackTriggered = false;
   for (const model of MODEL_CONFIGS) {
+
     try {
-      logger.info(`[MODEL GATEWAY] Activating: ${model.name}`);
 
-      const endpoint = model.endpoint(apiKey);
-      const payload = {
-        contents: [{
-          parts: [{
-            text: fullPrompt
-          }]
-        }]
-      };
+      // Gemini request
 
-      const response = await axios.post(endpoint, payload, {
-        headers: { 'Content-Type': 'application/json' },
-        timeout: model.timeout
-      });
-
-      const aiText = response.data?.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (aiText) {
-        logger.info(`[GATEWAY SUCCESS] Response generated using model ${model.name}`);
-        return {
-          success: true,
-          modelUsed: model.name,
-          response: aiText.trim(),
-          fallbackTriggered,
-          visualData
-        };
-      } else {
-        throw new Error(`Invalid or empty candidate output payload from model: ${model.name}`);
-      }
     } catch (error) {
-      fallbackTriggered = true;
-      if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
-        logger.error(`[TIMEOUT EVENT] request timed out for model: ${model.name}`);
-      } else {
-        logger.error(`[REQUEST FAILURE] Model error for ${model.name}: ${error.message}`);
-      }
+
+      // error logs
+
     }
   }
 
-  // H. Final offline/failure local generator fallback
+
   logger.warn('[FALLBACK TRIGGERED] All remote LLM models failed or timed out. Triggering native local engine.');
-  const finalLocalResponse = fallbackLogic(message, targetWeather, targetAirQuality, targetForecast, intent);
+
+  const finalLocalResponse = fallbackLogic(
+    message,
+    targetWeather,
+    targetAirQuality,
+    targetForecast,
+    intent
+  );
+
   return {
     success: false,
     modelUsed: 'local-fallback-failure',
@@ -305,7 +285,46 @@ export const handleAIChat = async (message, weatherData, airQualityData, forecas
     fallbackTriggered: true,
     visualData
   };
+} else {
+  throw new Error(`Invalid or empty candidate output payload from model: ${model.name}`);
+      }
+    } catch (error) {
+
+  fallbackTriggered = true;
+
+  console.error(
+    `[GEMINI ERROR] ${model.name}:`,
+    error.response?.data || error.message
+  );
+
+  if (
+    error.code === 'ECONNABORTED' ||
+    error.message.includes('timeout')
+  ) {
+
+    logger.error(
+      `[TIMEOUT EVENT] request timed out for model: ${model.name}`
+    );
+
+  } else {
+
+    logger.error(
+      `[REQUEST FAILURE] Model error for ${model.name}: ${error.message}`
+    );
+  }
+}
+
+// H. Final offline/failure local generator fallback
+logger.warn('[FALLBACK TRIGGERED] All remote LLM models failed or timed out. Triggering native local engine.');
+const finalLocalResponse = fallbackLogic(message, targetWeather, targetAirQuality, targetForecast, intent);
+return {
+  success: false,
+  modelUsed: 'local-fallback-failure',
+  response: finalLocalResponse,
+  fallbackTriggered: true,
+  visualData
 };
+  };
 
 /**
  * Legacy/Internal AI generation wrapper (used by backend weather analyzer for insights)
@@ -314,7 +333,7 @@ export const generateAIResponse = async (prompt) => {
   try {
     logger.info('[INTERNAL AI RESPONSE] Routing internal prompt into secured cascading router.');
     const result = await handleAIChat(prompt, {}, {}, { list: [] });
-    
+
     const text = result.response;
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
@@ -324,7 +343,7 @@ export const generateAIResponse = async (prompt) => {
         logger.warn(`[JSON PARSE FAILED] Falling back to raw text. Error: ${jsonErr.message}`);
       }
     }
-    
+
     return text;
   } catch (error) {
     logger.error(`[INTERNAL AI ERROR] Failed: ${error.message}`);
