@@ -23,11 +23,18 @@ app.use(pino({ logger }));
 // 2. Security Middleware
 app.use(helmet());
 app.use(cors({
-  origin: ['https://atmos-iq-chi.vercel.app'],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  origin: [
+    'https://atmos-iq-chi.vercel.app',
+    'http://localhost:5173'
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 }));
+
+app.options('*', cors());
+
+app.use(express.json());
 
 // 3. Body Parsers
 app.use(express.json({ limit: '10mb' })); // Support large weather payloads safely
