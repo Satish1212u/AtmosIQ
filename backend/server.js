@@ -14,7 +14,14 @@ const httpServer = createServer(app);
 initSocket(httpServer);
 
 if (process.env.MONGO_URI) {
+  /*
   connectDB();
+  */
+  try {
+     logger.info('Skipping MongoDB temporarily...');
+  } catch (error) {
+     logger.error(error.message);
+  }
 } else {
   logger.warn('MongoDB skipped');
 }
