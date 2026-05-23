@@ -337,7 +337,8 @@ Lekin live weather data active hai. ${weather?.name || 'Your area'} me abhi ${we
 
     const suggestions = generateSuggestions(textToSend, weather, airQuality);
     setBottomChips(suggestions.slice(0, 4));
-
+    console.log("FINAL AI RESULT:", aiResult);
+    console.log("FINAL AI TEXT:", aiResponseText);
     const aiResponse = {
       id: Date.now() + 1,
       type: 'ai',
