@@ -255,29 +255,53 @@ export const handleAIChat = async (message, weatherData, airQualityData, forecas
   // G. Fallback Cascade Loop
   let fallbackTriggered = false;
   for (const model of MODEL_CONFIGS) {
-
     try {
+      logger.info(`[MODEL GATEWAY] Activating: ${model.name}`);
 
-      // Gemini request
+      const endpoint = model.endpoint(apiKey);
+      const payload = {
+        contents: [{
+          parts: [{
+            text: fullPrompt
+          }]
+        }]
+      };
 
+      const response = await axios.post(endpoint, payload, {
+        headers: { 'Content-Type': 'application/json' },
+        timeout: model.timeout
+      });
+
+      const aiText = response.data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (aiText) {
+        logger.info(`[GATEWAY SUCCESS] Response generated using model ${model.name}`);
+        return {
+          success: true,
+          modelUsed: model.name,
+          response: aiText.trim(),
+          fallbackTriggered,
+          visualData
+        };
+      } else {
+        throw new Error(`Invalid or empty candidate output payload from model: ${model.name}`);
+      }
     } catch (error) {
-
-      // error logs
-
+      fallbackTriggered = true;
+      console.error(
+        `[GEMINI ERROR] ${model.name}:`,
+        error.response?.data || error.message
+      );
+      if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+        logger.error(`[TIMEOUT EVENT] request timed out for model: ${model.name}`);
+      } else {
+        logger.error(`[REQUEST FAILURE] Model error for ${model.name}: ${error.message}`);
+      }
     }
   }
 
-
+  // H. Final offline/failure local generator fallback
   logger.warn('[FALLBACK TRIGGERED] All remote LLM models failed or timed out. Triggering native local engine.');
-
-  const finalLocalResponse = fallbackLogic(
-    message,
-    targetWeather,
-    targetAirQuality,
-    targetForecast,
-    intent
-  );
-
+  const finalLocalResponse = fallbackLogic(message, targetWeather, targetAirQuality, targetForecast, intent);
   return {
     success: false,
     modelUsed: 'local-fallback-failure',
@@ -285,46 +309,7 @@ export const handleAIChat = async (message, weatherData, airQualityData, forecas
     fallbackTriggered: true,
     visualData
   };
-} else {
-  throw new Error(`Invalid or empty candidate output payload from model: ${model.name}`);
-      }
-    } catch (error) {
-
-  fallbackTriggered = true;
-
-  console.error(
-    `[GEMINI ERROR] ${model.name}:`,
-    error.response?.data || error.message
-  );
-
-  if (
-    error.code === 'ECONNABORTED' ||
-    error.message.includes('timeout')
-  ) {
-
-    logger.error(
-      `[TIMEOUT EVENT] request timed out for model: ${model.name}`
-    );
-
-  } else {
-
-    logger.error(
-      `[REQUEST FAILURE] Model error for ${model.name}: ${error.message}`
-    );
-  }
-}
-
-// H. Final offline/failure local generator fallback
-logger.warn('[FALLBACK TRIGGERED] All remote LLM models failed or timed out. Triggering native local engine.');
-const finalLocalResponse = fallbackLogic(message, targetWeather, targetAirQuality, targetForecast, intent);
-return {
-  success: false,
-  modelUsed: 'local-fallback-failure',
-  response: finalLocalResponse,
-  fallbackTriggered: true,
-  visualData
 };
-  };
 
 /**
  * Legacy/Internal AI generation wrapper (used by backend weather analyzer for insights)
