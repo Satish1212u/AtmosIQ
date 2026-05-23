@@ -1,3 +1,8 @@
+export const AI_PROVIDERS = {
+  GEMINI: 'gemini',
+  LOCAL: 'local'
+};
+
 export const MODEL_CONFIGS = [
   {
     id: 'gemini-2.0-flash',
