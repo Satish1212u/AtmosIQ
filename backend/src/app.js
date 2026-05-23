@@ -32,8 +32,8 @@ app.use(cors({
   credentials: true
 }));
 
-app.options('*', cors());
 
+app.options(/.*/, cors());
 
 
 // 3. Body Parsers
