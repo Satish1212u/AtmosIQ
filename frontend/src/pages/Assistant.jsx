@@ -111,7 +111,7 @@ const generateSuggestions = (userMessage, weather, airQuality) => {
    ══════════════════════════════════════════════════════════ */
 const CompactMetricsRow = ({ visualData, currentWeather, currentAQI }) => {
   let tempVal = visualData?.temp ?? (currentWeather?.main?.temp !== undefined ? Math.round(currentWeather.main.temp) : null);
-  
+
   let aqiVal = visualData?.AQI?.usAqi ?? null;
   if (aqiVal === null && currentAQI) {
     const pm2_5 = currentAQI?.list?.[0]?.components?.pm2_5;
@@ -123,7 +123,7 @@ const CompactMetricsRow = ({ visualData, currentWeather, currentAQI }) => {
       aqiVal = mappings[rawAqi];
     }
   }
-  
+
   let humidityVal = visualData?.humidity ?? (currentWeather?.main?.humidity !== undefined ? currentWeather.main.humidity : null);
   let windVal = visualData?.windSpeed ?? (currentWeather?.wind?.speed !== undefined ? currentWeather.wind.speed : null);
 
@@ -330,7 +330,9 @@ const Assistant = () => {
     setIsTyping(true);
 
     const aiResult = await generateAIResponse(textToSend, weather, airQuality, forecast);
-    const aiResponseText = aiResult.response || "I'm having trouble responding right now. Please try again.";
+    const aiResponseText = aiResult.response ||
+      `AtmosIQ AI abhi thoda overloaded hai 🤖  
+Lekin live weather data active hai. ${weather?.name || 'Your area'} me abhi ${weather?.weather?.[0]?.description || 'stable conditions'} hain with temperature around ${Math.round(weather?.main?.temp || 0)}°C.`;
     const visualData = aiResult.visualData || null;
 
     const suggestions = generateSuggestions(textToSend, weather, airQuality);
@@ -368,17 +370,18 @@ const Assistant = () => {
   const defaultChips = weather
     ? generateSuggestions('weather today', weather, airQuality).slice(0, 4)
     : [
-        { label: 'Current weather', emoji: '🌤️', query: 'What is the current weather?' },
-        { label: 'Air quality today', emoji: '🌿', query: 'What is the air quality today?' },
-        { label: 'Will it rain?', emoji: '🌧️', query: 'Will it rain today?' },
-        { label: '7-day forecast', emoji: '📅', query: 'Show me the weekly forecast' },
-      ];
+      { label: 'Current weather', emoji: '🌤️', query: 'What is the current weather?' },
+      { label: 'Air quality today', emoji: '🌿', query: 'What is the air quality today?' },
+      { label: 'Will it rain?', emoji: '🌧️', query: 'Will it rain today?' },
+      { label: '7-day forecast', emoji: '📅', query: 'Show me the weekly forecast' },
+    ];
 
   const visibleBottomChips = bottomChips ?? defaultChips;
 
   return (
     <div className={`relative min-h-screen w-full transition-colors duration-1000 bg-gradient-to-br ${theme.bg} overflow-x-hidden`}>
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         .custom-chat-scrollbar::-webkit-scrollbar { width: 5px; }
         .custom-chat-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); border-radius: 999px; }
         .custom-chat-scrollbar::-webkit-scrollbar-thumb { background: rgba(34,211,238,0.2); border-radius: 999px; }
@@ -389,7 +392,7 @@ const Assistant = () => {
       <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10 pointer-events-none mix-blend-overlay" />
 
       <div className="relative max-w-[1400px] w-[92%] mx-auto pt-32 pb-16 z-10">
-        
+
         {/* Header */}
         <div className="text-center w-full mb-8 relative z-20">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-extrabold uppercase tracking-widest text-cyan-400 mb-4 backdrop-blur-md shadow-lg shadow-black/20 animate-pulse">
@@ -410,7 +413,7 @@ const Assistant = () => {
 
         {/* Chat Console */}
         <div className="w-full h-[700px] max-h-[700px] min-h-[700px] flex flex-col overflow-hidden relative glass-dark rounded-[2.5rem] border border-white/10 shadow-[0_30px_70px_rgba(0,0,0,0.7)] backdrop-blur-3xl z-10">
-          
+
           {/* Messages viewport */}
           <div
             className="flex-1 overflow-y-auto custom-chat-scrollbar p-6 md:p-8 space-y-6 scroll-smooth relative"
@@ -427,11 +430,10 @@ const Assistant = () => {
                   className={`flex gap-4 ${msg.type === 'user' ? 'flex-row-reverse' : 'flex-row'} relative z-10`}
                 >
                   {/* Avatar */}
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-lg border ${
-                    msg.type === 'user'
-                      ? 'bg-gradient-to-br from-indigo-500 to-purple-600 border-purple-400/30'
-                      : 'bg-gradient-to-br from-cyan-500 to-blue-600 border-cyan-400/30 shadow-[0_0_15px_rgba(34,211,238,0.2)]'
-                  }`}>
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-lg border ${msg.type === 'user'
+                    ? 'bg-gradient-to-br from-indigo-500 to-purple-600 border-purple-400/30'
+                    : 'bg-gradient-to-br from-cyan-500 to-blue-600 border-cyan-400/30 shadow-[0_0_15px_rgba(34,211,238,0.2)]'
+                    }`}>
                     {msg.type === 'user' ? (
                       <User className="w-5 h-5 text-white" />
                     ) : (
@@ -440,14 +442,12 @@ const Assistant = () => {
                   </div>
 
                   {/* Message bubble */}
-                  <div className={`max-w-[85%] md:max-w-[78%] rounded-2xl px-5 py-4 shadow-2xl backdrop-blur-md relative group ${
-                    msg.type === 'user'
-                      ? 'bg-indigo-950/85 rounded-tr-none border border-indigo-400/40 text-left'
-                      : 'bg-slate-950/85 rounded-tl-none border border-cyan-500/35 text-left'
-                  }`}>
-                    <div className={`absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10 blur-xl ${
-                      msg.type === 'user' ? 'bg-purple-500/10' : 'bg-cyan-500/10'
-                    }`} />
+                  <div className={`max-w-[85%] md:max-w-[78%] rounded-2xl px-5 py-4 shadow-2xl backdrop-blur-md relative group ${msg.type === 'user'
+                    ? 'bg-indigo-950/85 rounded-tr-none border border-indigo-400/40 text-left'
+                    : 'bg-slate-950/85 rounded-tl-none border border-cyan-500/35 text-left'
+                    }`}>
+                    <div className={`absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10 blur-xl ${msg.type === 'user' ? 'bg-purple-500/10' : 'bg-cyan-500/10'
+                      }`} />
 
                     {msg.type === 'user' ? (
                       <p className="text-slate-100 leading-relaxed font-semibold text-[15px] whitespace-pre-line">{msg.text}</p>
@@ -527,11 +527,10 @@ const Assistant = () => {
               <button
                 type="button"
                 onClick={toggleListen}
-                className={`p-3.5 rounded-xl transition-all duration-300 flex items-center justify-center relative overflow-hidden group shrink-0 cursor-pointer ${
-                  isListening
-                    ? 'bg-red-500/20 border border-red-500 shadow-[0_0_20px_rgba(239,68,68,0.4)] text-red-400'
-                    : 'bg-white/5 border border-white/10 hover:bg-white/10 text-slate-300'
-                }`}
+                className={`p-3.5 rounded-xl transition-all duration-300 flex items-center justify-center relative overflow-hidden group shrink-0 cursor-pointer ${isListening
+                  ? 'bg-red-500/20 border border-red-500 shadow-[0_0_20px_rgba(239,68,68,0.4)] text-red-400'
+                  : 'bg-white/5 border border-white/10 hover:bg-white/10 text-slate-300'
+                  }`}
               >
                 {isListening && (
                   <div className="absolute inset-0 flex items-center justify-center gap-0.5 opacity-50">
