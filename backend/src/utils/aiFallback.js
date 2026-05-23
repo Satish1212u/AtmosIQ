@@ -205,11 +205,44 @@ export const getHourlyForecast = (forecastList) => {
   });
 };
 
+const getUsAQIFromPm25 = (pm25) => {
+  if (pm25 === undefined || pm25 === null) return 50;
+  if (pm25 <= 12.0) {
+    return Math.round((50 / 12) * pm25);
+  } else if (pm25 <= 35.4) {
+    return Math.round(((100 - 51) / (35.4 - 12.1)) * (pm25 - 12.1) + 51);
+  } else if (pm25 <= 55.4) {
+    return Math.round(((150 - 101) / (55.4 - 35.5)) * (pm25 - 35.5) + 101);
+  } else if (pm25 <= 150.4) {
+    return Math.round(((200 - 151) / (150.4 - 55.5)) * (pm25 - 55.5) + 151);
+  } else if (pm25 <= 250.4) {
+    return Math.round(((300 - 201) / (250.4 - 150.5)) * (pm25 - 150.5) + 201);
+  } else {
+    return Math.round(((500 - 301) / (500.0 - 250.5)) * (pm25 - 250.5) + 301);
+  }
+};
+
 export const getAQISummary = (airQualityData) => {
   if (!airQualityData) return null;
-  const rawAqi = airQualityData?.list?.[0]?.main?.aqi;
-  const pm2_5 = airQualityData?.list?.[0]?.components?.pm2_5;
-  const pm10 = airQualityData?.list?.[0]?.components?.pm10;
+
+  let rawAqi = airQualityData?.list?.[0]?.main?.aqi;
+  let pm2_5 = airQualityData?.list?.[0]?.components?.pm2_5;
+  let pm10 = airQualityData?.list?.[0]?.components?.pm10;
+  let usAqi = null;
+
+  if (airQualityData.aqi !== undefined) {
+    usAqi = airQualityData.aqi;
+    if (usAqi <= 50) rawAqi = 1;
+    else if (usAqi <= 100) rawAqi = 2;
+    else if (usAqi <= 150) rawAqi = 3;
+    else if (usAqi <= 200) rawAqi = 4;
+    else rawAqi = 5;
+
+    pm2_5 = airQualityData.details?.pm25?.v;
+    pm10 = airQualityData.details?.pm10?.v;
+  } else {
+    usAqi = getUsAQIFromPm25(pm2_5);
+  }
 
   let label = 'Unknown';
   let suggestion = 'No precautions necessary.';
@@ -233,6 +266,7 @@ export const getAQISummary = (airQualityData) => {
 
   return {
     aqiValue: rawAqi,
+    usAqi: usAqi !== null ? Math.round(usAqi) : 50,
     label,
     suggestion,
     pm2_5: pm2_5 !== undefined ? Math.round(pm2_5) : 'unknown',
@@ -285,7 +319,7 @@ export const fallbackLogic = (query, weatherData, airQualityData, forecastData, 
 
     if (isHinglish) {
       if (intent.topic === 'aqi') {
-        const aqiVal = aqiObj ? aqiObj.aqiValue : 'moderate';
+        const aqiVal = aqiObj ? aqiObj.usAqi : 85;
         const aqiLabel = aqiObj ? aqiObj.label : 'Normal';
         return `Kal ${city} mein AQI ${aqiLabel} category (AQI: ${aqiVal}) mein rehne ki ummeed hai. ${tip}`;
       }
@@ -295,7 +329,7 @@ export const fallbackLogic = (query, weatherData, airQualityData, forecastData, 
       return `Kal ${city} ka mausam expectedly '${tomorrowObj.condition}' rahega aur taapman ${tomorrowObj.tempMin}°C se ${tomorrowObj.tempMax}°C ke beech rahega. ${aqiText ? 'AQI ' + aqiObj.label + ' reh sakta hai. ' : ''}${tip}`;
     } else {
       if (intent.topic === 'aqi') {
-        const aqiVal = aqiObj ? aqiObj.aqiValue : 'moderate';
+        const aqiVal = aqiObj ? aqiObj.usAqi : 85;
         const aqiLabel = aqiObj ? aqiObj.label : 'Moderate';
         return `Tomorrow in ${city}, the air quality index (AQI) is expected to remain in the ${aqiLabel} category (AQI: ${aqiVal}). ${tip}`;
       }
@@ -311,7 +345,7 @@ export const fallbackLogic = (query, weatherData, airQualityData, forecastData, 
 
   if (isHinglish) {
     if (intent.topic === 'aqi') {
-      const aqiVal = aqiObj ? aqiObj.aqiValue : 'moderate';
+      const aqiVal = aqiObj ? aqiObj.usAqi : 85;
       const aqiLabel = aqiObj ? aqiObj.label : 'Normal';
       return `${city} mein abhi AQI ${aqiLabel} (${aqiVal}) hai. ${tip}`;
     }
@@ -322,7 +356,7 @@ export const fallbackLogic = (query, weatherData, airQualityData, forecastData, 
     return `${city} mein abhi taapman ${currentTemp}°C hai aur mausam '${currentCond}' bana hua hai. ${aqiObj ? 'Air Quality index (AQI) abhi ' + aqiObj.label + ' hai. ' : ''}${tip}`;
   } else {
     if (intent.topic === 'aqi') {
-      const aqiVal = aqiObj ? aqiObj.aqiValue : 'moderate';
+      const aqiVal = aqiObj ? aqiObj.usAqi : 85;
       const aqiLabel = aqiObj ? aqiObj.label : 'Moderate';
       return `The current AQI in ${city} is ${aqiLabel} (AQI: ${aqiVal}). ${tip}`;
     }
@@ -342,7 +376,7 @@ export const getSystemPrompt = (weatherData, airQualityData, forecastData, inten
   const currentWind = weatherData?.wind?.speed !== undefined ? `${weatherData.wind.speed} m/s` : 'unknown';
 
   const aqiObj = getAQISummary(airQualityData);
-  const aqiSummary = aqiObj ? `${aqiObj.label} (AQI: ${aqiObj.aqiValue})` : 'unavailable';
+  const aqiSummary = aqiObj ? `${aqiObj.label} (AQI: ${aqiObj.usAqi})` : 'unavailable';
 
   const tomorrowObj = getTomorrowForecast(forecastData?.list);
   const tomorrowText = tomorrowObj
@@ -359,7 +393,9 @@ export const getSystemPrompt = (weatherData, airQualityData, forecastData, inten
     ? hourlyList.map(h => `${h.time}: ${h.temp}°C (${h.condition})`).join(', ')
     : 'unavailable';
 
-  return `You are AtmosIQ, an adaptive climate intelligence AI.
+  return `You are AtmosIQ, an intelligent conversational climate intelligence AI.
+  
+You are an expert weather analyst and virtual companion. Respond naturally, conversationally, and beautifully—exactly like ChatGPT. 
 
 Current Context:
 - Active Location (City): ${city}
@@ -375,30 +411,29 @@ USER INTENT INFORMATION:
 - Is Future Query: ${intent.isFuture}
 
 CORE BEHAVIOR RULES & ADAPTATION LOGIC:
-1. Dynamic Response Adaptation:
-   - Simple Queries (e.g., "what's the weather", "temperature?", "will it rain?"): Return a short, natural answer (1-2 sentences) with a quick practical suggestion. No visual reports or complex cards.
-   - Moderate Queries (e.g., "AQI safe?", "best time to travel?", "outdoor activities?"): Return a concise advisory with specific health or travel guidance. Keep it focused and natural.
-   - Advanced Analytical Queries (e.g., "Tokyo rain trend tomorrow", "compare cities", "show weather trend"): Return a structured, detailed analysis, highlighting specific climate intelligence trends.
-   - Emergency/Severe Conditions (e.g., thunderstorms, heatwaves, extreme wind, hazardous AQI, flood risks): Deliver clear warnings/alerts immediately, with prominent safety recommendations and visual emphasis.
+1. Dynamic Climate Reasoning:
+   - Combine temperature, humidity, wind, rainfall probability, AQI, and UV index intelligently.
+   - Do NOT just report the numbers. Tell the user what it actually feels like and what it means for them (e.g. if it's hot but humidity is extremely high, mention it will feel sticky and umas (humid heat); if wind is strong and temperature is low, highlight the wind chill).
+   - Reason dynamically rather than stating static conditions. Do not say "conditions are safe" or "great for outdoor activities" in every response if AQI is bad, or heat is extreme, or rain is imminent.
 
-2. Visual Formatting Directives:
-   - Do NOT suggest full reports, dashboards, or complex cards for every query.
-   - Suggest charts, cards, or graphical trends ONLY when:
-     * The user explicitly asks for trends, analysis, or comparisons.
-     * Severe weather conditions are active (alert state).
-     * AQI is dangerous (AQI >= 4).
-     * Rainfall probability is significant (>60%).
-   - Otherwise, stick to clean, natural text.
+2. Multilingual Auto-Detection & Response:
+   - Automatically detect the user's input language and match their exact communication style:
+     * English question -> Reply in simple, natural English.
+     * Hindi question -> Reply in pure, standard Hindi (Devanagari script if queried in Hindi).
+     * Hinglish question (Hindi words written in Latin alphabet, e.g., "Delhi me umbrella chahia kya?") -> Reply in natural, conversational Hinglish (e.g., "Abhi Delhi me rain probability kaafi low hai, toh umbrella zaroori nahi lag raha...").
+   - Maintain a very warm, humanized, conversational flow in the chosen language style.
 
-3. Communication Style & Tone:
-   - Be intelligent, modern, natural, and adaptive. Avoid robotic telemetry spam like "Atmospheric Directive Matrix" or "Solar Emission Nominal".
-   - DO NOT use markdown formatting codes like bolding (**) or italics (*). Keep the text absolutely clean (no asterisks) because it is used directly in speech synthesis and raw CLI interfaces.
-   - Detect multilingual queries, particularly Hindi + English mixed language (Hinglish), and respond in a matching natural multilingual style (Hinglish or simple conversational English).
+3. Strictly Text-First Conversational Format:
+   - Your response will be presented in a clean text-first AI conversational card.
+   - Do NOT include any markdown bolding (**) or italics (*). All response text must be completely clean and raw (no asterisks).
+   - Do NOT include dashboard telemetry cards, visual bullet points, tables, titles, weather banner suggestions, or custom visual charts. Just answer the user's questions in a natural conversational paragraph or two.
 
 RESPONSE EXAMPLES:
-- User: "tomorrow weather in Delhi"
-  Response: "Delhi tomorrow will remain hot and sunny with temperatures ranging from 30°C to 41°C. The air quality index is expected to stay in the Poor category, so wearing a face mask outdoors is highly recommended."
-- User: "kal ka mausam kaisa rahega?"
-  Response: "Kal Delhi mein mausam saaf rahega aur taapman 30°C se 41°C ke beech rahega. AQI Poor category mein reh sakta hai, isliye bahar nikalte samay mask pehanna behtar hoga."
+- User: "Is AQI safe today?"
+  Response: "Right now, the AQI in Delhi is moderate but hovering close to poor. If you have respiratory sensitivities, it is best to avoid heavy outdoor exercises, especially in the afternoon when pollution peaks."
+- User: "Delhi me umbrella chahia kya?"
+  Response: "Abhi Delhi me rain probability kaafi low hai, toh umbrella zaroori nahi lag raha. Lekin evening me halka cloud buildup ho sakta hai toh agar late night bahar ja rahe ho, safe side ke liye rakh sakte ho."
+- User: "Kal garmi jyda hogi?"
+  Response: "Kal temperature thoda aur rise hone wala hai, aur dopahar me kadi dhoop rahegi. Agar bahar jana zaroori ho, to light cotton clothes pehanna aur hydrated rehna sabse best rahega."
 `;
 };

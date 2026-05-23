@@ -134,6 +134,9 @@ const buildVisualData = (weatherData, airQualityData, forecastData, intent) => {
   };
 
   return {
+    temp: tempVal,
+    humidity: humidityVal,
+    windSpeed: windVal,
     forecast,
     hourlyTemps,
     rainChance,
