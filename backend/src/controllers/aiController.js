@@ -1,6 +1,6 @@
 import { getFullWeatherReport } from '../services/weather/weatherService.js';
 import { catchAsync } from '../middleware/errorMiddleware.js';
-import { handleAIChat } from '../services/aiService.js'
+import { handleAIChat } from '../services/aiService.js';
 
 /**
  * Handle weather intelligence requests

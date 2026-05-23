@@ -34,7 +34,7 @@ app.use(cors({
 
 app.options('*', cors());
 
-app.use(express.json());
+
 
 // 3. Body Parsers
 app.use(express.json({ limit: '10mb' })); // Support large weather payloads safely
