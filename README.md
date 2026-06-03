@@ -1,52 +1,103 @@
-<<<<<<< HEAD
-# 🌀 AtmosIQ — Next-Generation Climate Intelligence Platform
+# 🌦️ AtmosIQ — AI Climate Intelligence Platform
 
-AtmosIQ is an enterprise-grade, high-fidelity AI-powered climate intelligence engine providing real-time environmental telemetry, deep air quality indices, and predictive weather simulation analytics. Built using Vite, React, Node.js, Express, and Google Gemini AI model orchestration.
+![AtmosIQ Banner](https://via.placeholder.com/1200x400?text=AtmosIQ)
+
+AtmosIQ is a next-generation AI-powered Climate Intelligence Platform that combines real-time weather monitoring, AQI analytics, atmospheric visualization, and intelligent environmental insights into a futuristic user experience.
+
+Designed with modern web technologies and enhanced by AI, AtmosIQ helps users understand environmental conditions through immersive dashboards, predictive insights, and real-time telemetry.
+
+---
+
+## 🚀 Live Demo
+
+🌐 **Live Website:** https://atmos-iq-chi.vercel.app
+
+---
+
+## ✨ Key Features
+
+### 🌤 Real-Time Weather Intelligence
+
+* Live weather monitoring
+* Temperature, humidity, wind speed, and cloud coverage
+* Dynamic weather conditions
+
+### 🌫 Air Quality Monitoring
+
+* Real-time AQI tracking
+* Pollution risk assessment
+* Environmental health indicators
+
+### 🤖 AI-Powered Insights
+
+* Smart environmental analysis
+* Personalized weather recommendations
+* Gemini AI integration
+
+### 📡 Live Environmental Telemetry
+
+* Continuous atmospheric monitoring
+* Real-time updates
+* Intelligent alerts
+
+### 🎨 Immersive UI Experience
+
+* Futuristic dashboard design
+* Dynamic atmospheric backgrounds
+* Glassmorphism interface
+* Responsive across all devices
+
+### 🗺 Advanced Visualization
+
+* Weather radar integration
+* Climate analytics dashboard
+* Environmental data visualization
+
+---
+
+## 🛠 Tech Stack
+
+### Frontend
+
+* React.js
+* Vite
+* Tailwind CSS
+* Framer Motion
+* React Router
+
+### Backend
+
+* Node.js
+* Express.js
+* MongoDB
+* Socket.io
+
+### AI Layer
+
+* Google Gemini AI
+* Python Flask
+
+### Deployment
+
+* Vercel
+* Render
+* Docker
+
+---
 
 ## 📁 Project Structure
 
-### 🌐 Frontend (`/frontend`)
-- **`src/components/`**: Reusable UI components (Glassmorphism, AI Orb).
-- **`src/pages/`**: Main application views (Dashboard, Travel, Radar).
-- **`src/hooks/`**: Custom React hooks for state and data fetching.
-- **`src/assets/`**: Static assets and global styles.
-
-### ⚙️ Backend (`/backend`)
-- **`src/config/`**: Database and infrastructure configuration.
-- **`src/controllers/`**: API request handlers.
-- **`src/middleware/`**: Security, validation, and error handlers.
-- **`src/models/`**: Mongoose schemas (User, Alert, RiskProfile).
-- **`src/routes/`**: API route definitions.
-- **`src/services/`**: Core business logic (Weather orchestration, Gemini AI).
-- **`src/sockets/`**: Real-time event management.
-- **`src/utils/`**: Helper functions and Logger (Pino).
-- **`src/validators/`**: Zod validation schemas.
-
-### 🤖 AI Engine (`/ai-engine`)
-- **`app.py`**: Python Flask service for advanced environmental analysis.
-
----
-
-## 🛠️ Setup & Deployment
-
-### Environment Variables
-Ensure you have a `.env` in both `/backend` and `/frontend` directories. See `.env.example` at root.
-
-### Running Locally
-1. **Backend**: `cd backend && npm install && npm run dev`
-2. **Frontend**: `cd frontend && npm install && npm run dev`
-
-### Deployment
-- **Frontend**: Optimized for Vercel/Netlify.
-- **Backend**: Ready for Render/Heroku/AWS with Docker support.
-
----
-
-## 🌲 Folder Tree Structure
-```text
-.
-├── ai-engine/
-│   └── app.py
+```bash
+AtmosIQ
+│
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── hooks/
+│   │   ├── assets/
+│   │   └── services/
+│
 ├── backend/
 │   ├── src/
 │   │   ├── config/
@@ -58,17 +109,122 @@ Ensure you have a `.env` in both `/backend` and `/frontend` directories. See `.e
 │   │   ├── sockets/
 │   │   ├── utils/
 │   │   └── validators/
-│   ├── server.js
-│   └── Dockerfile
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   └── assets/
-│   └── vite.config.js
+│
+├── ai-engine/
+│   └── app.py
+│
 └── README.md
 ```
-=======
-# AtmosIQ
-AtmosIQ is an AI-powered Climate Intelligence Platform that combines real-time weather, AQI monitoring, dynamic atmospheric visuals, and smart environmental insights into a futuristic immersive experience.
->>>>>>> ffad6af8f07d8d0e526b168fad3ce73f79c4e40b
+
+---
+
+## ⚙️ Installation
+
+### Clone Repository
+
+```bash
+git clone https://github.com/your-username/AtmosIQ.git
+cd AtmosIQ
+```
+
+### Backend Setup
+
+```bash
+cd backend
+npm install
+npm run dev
+```
+
+### Frontend Setup
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+### AI Engine
+
+```bash
+cd ai-engine
+pip install -r requirements.txt
+python app.py
+```
+
+---
+
+## 🔑 Environment Variables
+
+Create `.env` files inside frontend and backend directories.
+
+Example:
+
+```env
+GEMINI_API_KEY=your_api_key
+MONGODB_URI=your_mongodb_uri
+JWT_SECRET=your_secret
+```
+
+---
+
+## 📸 Screenshots
+
+### Dashboard
+
+Add dashboard screenshot here.
+
+### Weather Intelligence
+
+Add weather analytics screenshot here.
+
+### AI Assistant
+
+Add AI assistant screenshot here.
+
+---
+
+## 🎯 Future Roadmap
+
+* Advanced climate prediction
+* Satellite imagery integration
+* Disaster alert system
+* Environmental risk forecasting
+* Mobile application
+* Multi-language support
+
+---
+
+## 📊 Performance Goals
+
+* Fast loading dashboard
+* Real-time data synchronization
+* AI-driven environmental recommendations
+* Enterprise-grade scalability
+
+---
+
+## 🤝 Contributing
+
+Contributions, issues, and feature requests are welcome.
+
+Feel free to fork the repository and submit a pull request.
+
+---
+
+## 📄 License
+
+Licensed under the Apache 2.0 License.
+
+---
+
+## 👨‍💻 Developer
+
+**Satish Gupta**
+
+Frontend Developer | AI Enthusiast | Climate-Tech Builder
+
+GitHub: https://github.com/Satish1212u
+
+---
+
+⭐ If you found this project useful, consider giving it a star.
