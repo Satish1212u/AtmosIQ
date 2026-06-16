@@ -1,6 +1,7 @@
 # 🌦️ AtmosIQ — AI Climate Intelligence Platform
 
-![AtmosIQ Banner](https://via.placeholder.com/1200x400?text=AtmosIQ)
+<img width="1666" height="944" alt="Atmos" src="https://github.com/user-attachments/assets/d2432400-f7fb-4b5a-90bf-a325e7edb162" />
+
 
 AtmosIQ is a next-generation AI-powered Climate Intelligence Platform that combines real-time weather monitoring, AQI analytics, atmospheric visualization, and intelligent environmental insights into a futuristic user experience.
 
@@ -10,7 +11,7 @@ Designed with modern web technologies and enhanced by AI, AtmosIQ helps users un
 
 ## 🚀 Live Demo
 
-🌐 **Live Website:** https://atmos-iq-chi.vercel.app
+🌐 **Live Website:** https://atmosiqai.vercel.app/
 
 ---
 
