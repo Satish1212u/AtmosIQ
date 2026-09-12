@@ -14,55 +14,58 @@ const DynamicBackground = ({ children }) => {
   const atmosphere = useAtmosphere();
   const { condition, windSpeed, aqiLevel, humidityLevel, isNight } = atmosphere;
 
-  // LAYER 1: Luxury Palette Atmosphere (Warm Ivory / Champagne / Soft Beige / Deep Espresso Obsidian)
+  // LAYER 1: Luxury Palette Atmosphere (Warm Ivory / Champagne / Soft Beige / Alabaster / Pearl / Cashmere)
   const getBackgroundClass = () => {
     switch (condition) {
       case 'rain':
       case 'drizzle':
-        return 'bg-gradient-to-b from-[#F2EDE4] via-[#E8E2D6] to-[#DCD3C3]';
+        // RAIN: cool pearl ivory + soft mineral beige + subtle gold reflections
+        return 'bg-gradient-to-b from-[#F3EFE9] via-[#E8E1D5] to-[#DCD3C3]';
       case 'thunderstorm':
-        return 'bg-gradient-to-b from-[#211E1B] via-[#2D2824] to-[#1C1815]';
+        // STORM: light stone + muted beige with extremely subtle champagne lightning
+        return 'bg-gradient-to-b from-[#ECE6DC] via-[#E2D9CB] to-[#D6CAB8]';
       case 'snow':
-        return 'bg-gradient-to-b from-[#FAF8F5] via-[#F3ECE0] to-[#EAE0D0]';
+        // SNOW: crystalline pearl white + champagne highlights
+        return 'bg-gradient-to-b from-[#FCFBF9] via-[#F6F1E8] to-[#EAE1D2]';
       case 'fog':
       case 'mist':
       case 'haze':
-        return 'bg-gradient-to-b from-[#F0EAE1] via-[#E6DDD1] to-[#D8CEBF]';
+        // FOG: cashmere white + warm parchment haze
+        return 'bg-gradient-to-b from-[#F5F0E8] via-[#EBE3D5] to-[#DDD2C0]';
       case 'heat':
         return 'bg-gradient-to-b from-[#FAF4EC] via-[#F4E9D8] to-[#EAD5BA]';
       case 'night':
-        return 'bg-gradient-to-b from-[#181513] via-[#24201C] to-[#141210]';
+        // NIGHT: pearl ivory + soft taupe + champagne gold (luxury observatory feel)
+        return 'bg-gradient-to-b from-[#FAF7F2] via-[#F2EAE0] to-[#E5DACD]';
       case 'clouds':
-        return 'bg-gradient-to-b from-[#F4EFE6] via-[#EAE3D5] to-[#DFD6C5]';
+        // CLOUDY: soft ivory + pale beige atmospheric depth
+        return 'bg-gradient-to-b from-[#FAF6EF] via-[#EFE7D8] to-[#DFD5C3]';
       case 'clear':
       default:
+        // CLEAR: warm ivory + subtle champagne sunlight
         return isNight 
-          ? 'bg-gradient-to-b from-[#181513] via-[#24201C] to-[#141210]'
+          ? 'bg-gradient-to-b from-[#FAF7F2] via-[#F2EAE0] to-[#E5DACD]'
           : 'bg-gradient-to-b from-[#FAF8F5] via-[#F5EFEB] to-[#EAE2D3]';
     }
   };
 
-  const isDarkCondition = condition === 'thunderstorm' || condition === 'night' || isNight;
-
   return (
-    <div className={`min-h-screen w-full relative overflow-hidden transition-colors duration-[2500ms] ease-out ${getBackgroundClass()} z-0 ${isDarkCondition ? 'text-[#FAF8F5]' : 'text-[#1C1917]'}`}>
+    <div className={`min-h-screen w-full relative overflow-hidden transition-colors duration-[2500ms] ease-out ${getBackgroundClass()} z-0 text-[#1C1917]`}>
       
       {/* LAYER 1.5: Three.js Unified 3D Spatial Atmosphere Engine */}
       <LuxurySpatialAtmosphere 
         condition={condition} 
         windSpeed={windSpeed} 
-        isNight={isDarkCondition}
+        isNight={isNight}
         aqiLevel={aqiLevel}
       />
 
       {/* LAYER 2: Ambient Auric Lighting Scatters */}
       <div className="absolute inset-0 pointer-events-none z-[1] overflow-hidden">
         {/* Soft Golden Sunlight Bloom */}
-        {!isDarkCondition && (
-          <div 
-            className="absolute -top-[15%] right-[-5%] w-[65vw] h-[65vw] rounded-full bg-gradient-to-br from-[#DFCCA6]/25 to-transparent blur-[140px]" 
-          />
-        )}
+        <div 
+          className="absolute -top-[15%] right-[-5%] w-[65vw] h-[65vw] rounded-full bg-gradient-to-br from-[#DFCCA6]/25 to-transparent blur-[140px]" 
+        />
 
         {/* Ambient Champagne Radiance */}
         <div 
