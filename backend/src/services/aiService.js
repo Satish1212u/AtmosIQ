@@ -1,6 +1,6 @@
 import axios from 'axios';
 import logger from '../utils/logger.js';
-import { MODEL_CONFIGS } from '../config/aiModels.js';
+import { MODEL_CONFIGS, OPENROUTER_CONFIG } from '../config/aiModels.js';
 import { ApiError } from '../middleware/errorMiddleware.js';
 import { getFullWeatherReport } from './weather/weatherService.js';
 import {
@@ -13,6 +13,26 @@ import {
   getAQISummary
 } from '../utils/aiFallback.js';
 
+// ─── Retriable error classifier ──────────────────────────────────────────────
+/**
+ * Returns true only for transient/provider failures that should trigger fallback.
+ * Non-retriable errors (401, 403, 400, invalid payload) break the cascade immediately.
+ */
+const isRetriableError = (error) => {
+  // Network / timeout
+  if (error.code === 'ECONNABORTED' || error.code === 'ECONNRESET' ||
+      error.code === 'ETIMEDOUT' || error.message?.includes('timeout')) {
+    return true;
+  }
+  // No response at all (network failure)
+  if (!error.response) return true;
+
+  const status = error.response.status;
+  // 429 Too Many Requests or any 5xx server error
+  return status === 429 || (status >= 500 && status <= 599);
+};
+
+// ─── Telemetry optimizer ──────────────────────────────────────────────────────
 /**
  * Strips raw API response fields, keeping only the essential telemetry
  * properties required for prompts and rendering to optimize context size.
@@ -77,6 +97,7 @@ const optimizeTelemetryPayload = (weather, aqi, forecast) => {
   return { cleanWeather, cleanAQI, cleanForecast };
 };
 
+// ─── Visual data builder ──────────────────────────────────────────────────────
 /**
  * Server-side Multimodal Visual Data Synthesis Module
  */
@@ -150,19 +171,50 @@ const buildVisualData = (weatherData, airQualityData, forecastData, intent) => {
   };
 };
 
+// ─── Normalized response builder ──────────────────────────────────────────────
 /**
- * Handle direct AI requests from the frontend using backend environment secrets
+ * Builds the normalized AI response object that ALL providers must return.
+ * Both `reply` and `response` are always populated to support Travel.jsx,
+ * Planner.jsx, and the Assistant — which may read either field.
+ */
+const buildResponse = (text, modelName, fallbackTriggered, visualData) => ({
+  success: true,
+  reply: text,
+  response: text,
+  modelUsed: modelName,
+  fallbackTriggered,
+  visualData
+});
+
+const buildFailureResponse = (text, modelName, visualData) => ({
+  success: false,
+  reply: text,
+  response: text,
+  modelUsed: modelName,
+  fallbackTriggered: true,
+  visualData
+});
+
+// ─── Main AI chat handler ─────────────────────────────────────────────────────
+/**
+ * Handle direct AI requests from the frontend using backend environment secrets.
+ * Implements the 5-tier fallback cascade:
+ *   1. Gemini 2.5 Flash (8s)
+ *   2. Gemini 2.5 Flash-Lite (5s)
+ *   3. Gemini 2.0 Flash (6s)
+ *   4. OpenRouter (12s)
+ *   5. Local heuristic fallback (always succeeds)
  */
 export const handleAIChat = async (message, weatherData, airQualityData, forecastData) => {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const geminiKey = process.env.GEMINI_API_KEY;
 
-  // Optimize telemetry data size immediately to minimize context tokens and server memory footprint
+  // Optimize telemetry data size to minimize context tokens and server memory
   const { cleanWeather, cleanAQI, cleanForecast } = optimizeTelemetryPayload(weatherData, airQualityData, forecastData);
 
   // A. Classification of user intent & city mention extraction
   const intent = detectUserIntent(message);
   const extractedCity = extractCity(message);
-  logger.info(`[INTENT DETECTION] Classifying query: "${message.substring(0, 40)}..." -> Topic: ${intent.topic}, Future: ${intent.isFuture}`);
+  logger.info(`[INTENT DETECTION] Query: "${message.substring(0, 50)}..." -> Topic: ${intent.topic}, Future: ${intent.isFuture}`);
 
   let targetWeather = cleanWeather;
   let targetAirQuality = cleanAQI;
@@ -171,7 +223,7 @@ export const handleAIChat = async (message, weatherData, airQualityData, forecas
   // B. Dynamic City Matching on Backend
   if (extractedCity && (!weatherData || !weatherData.name || extractedCity.toLowerCase() !== weatherData.name.toLowerCase())) {
     try {
-      logger.info(`[DYNAMIC RESOLUTION] Mentions different location: "${extractedCity}". Querying backend weather metrics...`);
+      logger.info(`[DYNAMIC RESOLUTION] Different location mentioned: "${extractedCity}". Querying backend weather metrics...`);
       const report = await getFullWeatherReport(null, null, extractedCity);
 
       targetWeather = {
@@ -204,9 +256,7 @@ export const handleAIChat = async (message, weatherData, airQualityData, forecas
               main: daily.weather_code[i] > 50 ? 'Rain' : 'Clear',
               description: daily.weather_code[i] > 50 ? 'rainy' : 'clear sky'
             }],
-            wind: {
-              speed: 2.5
-            },
+            wind: { speed: 2.5 },
             pop: (daily.precipitation_probability_max[i] || 0) / 100
           });
         }
@@ -214,109 +264,145 @@ export const handleAIChat = async (message, weatherData, airQualityData, forecas
 
       targetForecast = { list: synthesizedList };
       targetAirQuality = report.airQuality;
-      logger.info(`[DYNAMIC RESOLUTION SUCCESS] Resolved telemetry context for "${extractedCity}" successfully.`);
+      logger.info(`[DYNAMIC RESOLUTION SUCCESS] Resolved telemetry for "${extractedCity}".`);
     } catch (err) {
-      logger.warn(`[DYNAMIC RESOLUTION FAILED] Error loading report for "${extractedCity}". Falling back to passed context. Error: ${err.message}`);
+      logger.warn(`[DYNAMIC RESOLUTION FAILED] Error for "${extractedCity}". Using passed context. Error: ${err.message}`);
     }
   }
 
   // C. Synthesize Visual Telemetry Data block
   const visualData = buildVisualData(targetWeather, targetAirQuality, targetForecast, intent);
 
-  // D. Check future intent data constraints
+  // D. Future intent data guard
   if (intent.isFuture && (!targetForecast || !targetForecast.list || targetForecast.list.length === 0)) {
-    logger.warn('[RULE ENGINE] Future query detected but forecast list is missing. Returning stable error.');
-    return {
-      success: false,
-      modelUsed: 'rule-engine-check',
-      response: "Forecast data is currently unavailable. Please try again later.",
-      fallbackTriggered: true,
+    logger.warn('[RULE ENGINE] Future query but forecast data missing. Returning stable error.');
+    return buildFailureResponse(
+      'Forecast data is currently unavailable. Please try again later.',
+      'rule-engine-check',
       visualData
-    };
+    );
   }
 
-  // E. API Key checks
-  if (!apiKey) {
-    logger.error('[SECURITY ERROR] GEMINI_API_KEY missing from backend environment variables!');
-    const fallbackResponse = fallbackLogic(message, targetWeather, targetAirQuality, targetForecast, intent);
-    return {
-      success: false,
-      modelUsed: 'local-fallback-no-key',
-      response: fallbackResponse,
-      fallbackTriggered: true,
-      visualData
-    };
+  // E. Gemini API key guard — skip Gemini cascade entirely, go to OpenRouter
+  if (!geminiKey) {
+    logger.error('[SECURITY ERROR] GEMINI_API_KEY missing from backend environment!');
+    // Don't return immediately — fall through to OpenRouter / local fallback below
   }
 
   // F. Prompt Synthesis
   const systemPrompt = getSystemPrompt(targetWeather, targetAirQuality, targetForecast, intent);
-  const fullPrompt = `${systemPrompt}\n\nUser Question: ${message}`;
+  const isJsonRequested = /return only.*json|valid json|json object/i.test(message);
+  const jsonDirective = isJsonRequested
+    ? '\n\nCRITICAL INSTRUCTION: The user has requested a structured JSON response. You MUST return ONLY the raw, valid JSON object matching the requested schema. Do NOT include conversational text, preamble, explanation, or markdown backticks.'
+    : '';
+  const fullPrompt = `${systemPrompt}${jsonDirective}\n\nUser Question: ${message}`;
 
-  // G. Fallback Cascade Loop
-  let fallbackTriggered = false;
-  for (const model of MODEL_CONFIGS) {
-    try {
-      logger.info(`[MODEL GATEWAY] Activating: ${model.name}`);
+  // ── G. Gemini Cascade ──────────────────────────────────────────────────────
+  if (geminiKey) {
+    for (const model of MODEL_CONFIGS) {
+      const t0 = Date.now();
+      try {
+        logger.info(`[AI] ${model.name} -> attempting...`);
 
-      const endpoint = model.endpoint(apiKey);
-      const payload = {
-        contents: [{
-          parts: [{
-            text: fullPrompt
-          }]
-        }]
-      };
+        const response = await axios.post(
+          model.endpoint(geminiKey),
+          { contents: [{ parts: [{ text: fullPrompt }] }] },
+          {
+            headers: { 'Content-Type': 'application/json' },
+            timeout: model.timeout
+          }
+        );
 
-      const response = await axios.post(endpoint, payload, {
-        headers: { 'Content-Type': 'application/json' },
-        timeout: model.timeout
-      });
+        const elapsed = Date.now() - t0;
+        const aiText = response.data?.candidates?.[0]?.content?.parts?.[0]?.text;
 
-      const aiText = response.data?.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (aiText) {
-        logger.info(`[GATEWAY SUCCESS] Response generated using model ${model.name}`);
-        return {
-          success: true,
-          modelUsed: model.name,
-          response: aiText.trim(),
-          fallbackTriggered,
-          visualData
-        };
-      } else {
-        throw new Error(`Invalid or empty candidate output payload from model: ${model.name}`);
-      }
-    } catch (error) {
-      fallbackTriggered = true;
-      console.error(
-        `[GEMINI ERROR] ${model.name}:`,
-        error.response?.data || error.message
-      );
-      if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
-        logger.error(`[TIMEOUT EVENT] request timed out for model: ${model.name}`);
-      } else {
-        logger.error(`[REQUEST FAILURE] Model error for ${model.name}: ${error.message}`);
+        if (aiText) {
+          logger.info(`[AI] ${model.name} -> ${elapsed}ms -> SUCCESS`);
+          return buildResponse(aiText.trim(), model.name, false, visualData);
+        }
+
+        throw new Error(`Empty candidate payload from ${model.name}`);
+
+      } catch (error) {
+        const elapsed = Date.now() - t0;
+        const status = error.response?.status;
+        const retriable = isRetriableError(error);
+
+        if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+          logger.error(`[AI] ${model.name} -> ${elapsed}ms -> TIMEOUT`);
+        } else {
+          logger.error(`[AI] ${model.name} -> ${elapsed}ms -> FAIL (HTTP ${status || 'N/A'}): ${error.message}`);
+        }
+
+        if (!retriable) {
+          // Non-retriable (e.g. 401, 403, 400): break Gemini cascade, skip to OpenRouter
+          logger.warn(`[AI] ${model.name} -> Non-retriable error (HTTP ${status}). Breaking Gemini cascade.`);
+          break;
+        }
+        // Retriable: continue to next Gemini model
       }
     }
   }
 
-  // H. Final offline/failure local generator fallback
-  logger.warn('[FALLBACK TRIGGERED] All remote LLM models failed or timed out. Triggering native local engine.');
-  const finalLocalResponse = fallbackLogic(message, targetWeather, targetAirQuality, targetForecast, intent);
-  return {
-    success: false,
-    modelUsed: 'local-fallback-failure',
-    response: finalLocalResponse,
-    fallbackTriggered: true,
-    visualData
-  };
+  // ── H. OpenRouter Secondary Fallback ──────────────────────────────────────
+  const openRouterKey = process.env.OPENROUTER_API_KEY;
+  const openRouterModel = OPENROUTER_CONFIG.getModel();
+
+  if (openRouterKey) {
+    const t0 = Date.now();
+    try {
+      logger.info(`[AI] OpenRouter (${openRouterModel}) -> attempting...`);
+
+      const orResponse = await axios.post(
+        OPENROUTER_CONFIG.endpoint,
+        {
+          model: openRouterModel,
+          messages: [{ role: 'user', content: fullPrompt }]
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${openRouterKey}`,
+            'Content-Type': 'application/json',
+            'HTTP-Referer': process.env.FRONTEND_URL || 'https://atmosiq.app',
+            'X-Title': 'AtmosIQ'
+          },
+          timeout: OPENROUTER_CONFIG.timeout
+        }
+      );
+
+      const elapsed = Date.now() - t0;
+      const orText = orResponse.data?.choices?.[0]?.message?.content;
+
+      if (orText) {
+        logger.info(`[AI] OpenRouter (${openRouterModel}) -> ${elapsed}ms -> SUCCESS`);
+        return buildResponse(orText.trim(), `openrouter/${openRouterModel}`, true, visualData);
+      }
+
+      throw new Error('OpenRouter returned empty or malformed response.');
+
+    } catch (orError) {
+      const elapsed = Date.now() - t0;
+      const orStatus = orError.response?.status;
+      // Safe log: never print the key, only status + sanitized error message
+      logger.error(`[AI] OpenRouter -> ${elapsed}ms -> FAIL (HTTP ${orStatus || 'N/A'}): ${orError.response?.data?.error?.message || orError.message}`);
+    }
+  } else {
+    logger.warn('[AI] OPENROUTER_API_KEY not set. Skipping OpenRouter.');
+  }
+
+  // ── I. Local Heuristic Fallback (always succeeds) ─────────────────────────
+  logger.warn('[AI] All remote providers failed. Activating local heuristic fallback engine.');
+  const localResponse = fallbackLogic(message, targetWeather, targetAirQuality, targetForecast, intent);
+  return buildFailureResponse(localResponse, 'local-heuristic-fallback', visualData);
 };
 
+// ─── Internal AI wrapper ──────────────────────────────────────────────────────
 /**
- * Legacy/Internal AI generation wrapper (used by backend weather analyzer for insights)
+ * Legacy/Internal AI generation wrapper (used by backend weather analyzer for insights).
  */
 export const generateAIResponse = async (prompt) => {
   try {
-    logger.info('[INTERNAL AI RESPONSE] Routing internal prompt into secured cascading router.');
+    logger.info('[INTERNAL AI] Routing internal prompt through cascading router.');
     const result = await handleAIChat(prompt, {}, {}, { list: [] });
 
     const text = result.response;
@@ -325,13 +411,13 @@ export const generateAIResponse = async (prompt) => {
       try {
         return JSON.parse(jsonMatch[0]);
       } catch (jsonErr) {
-        logger.warn(`[JSON PARSE FAILED] Falling back to raw text. Error: ${jsonErr.message}`);
+        logger.warn(`[INTERNAL AI] JSON parse failed, returning raw text. Error: ${jsonErr.message}`);
       }
     }
 
     return text;
   } catch (error) {
-    logger.error(`[INTERNAL AI ERROR] Failed: ${error.message}`);
+    logger.error(`[INTERNAL AI] Failed: ${error.message}`);
     throw new ApiError(500, 'Internal AI Engine failed to process request');
   }
 };

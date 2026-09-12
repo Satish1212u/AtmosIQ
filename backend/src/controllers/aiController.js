@@ -48,44 +48,56 @@ export const getTravelAnalysis = catchAsync(async (req, res) => {
 });
 
 /**
- * Handle conversational AI chat requests by orchestration with Gemini
+ * Handle conversational AI chat requests.
+ *
+ * Response contract — always returns both fields so Travel.jsx, Planner.jsx,
+ * and the Assistant can read whichever field they prefer:
+ * {
+ *   success: boolean,
+ *   reply: string,          // primary field used by frontend aiApi.js
+ *   response: string,       // alias kept for backward-compatibility
+ *   modelUsed: string,
+ *   fallbackTriggered: boolean,
+ *   visualData: object
+ * }
  */
 export const chatWithAI = async (req, res) => {
   try {
-
-    console.log("AI REQUEST BODY:", req.body);
-
-    const { message, weatherData } = req.body;
+    const { message, weatherData, airQualityData, forecastData } = req.body;
 
     if (!message) {
       return res.status(400).json({
         success: false,
-        message: "Message is required"
+        message: 'Message is required'
       });
     }
 
     const aiResponse = await handleAIChat(
       message,
       weatherData,
-      req.body.airQualityData,
-      req.body.forecastData
+      airQualityData,
+      forecastData
     );
 
+    // aiService always returns { success, reply, response, modelUsed, fallbackTriggered, visualData }
     return res.status(200).json({
-      success: true,
-      reply: aiResponse.response,
-      visualData: aiResponse.visualData,
-      modelUsed: aiResponse.modelUsed
+      success: aiResponse.success,
+      reply: aiResponse.reply,
+      response: aiResponse.response,
+      modelUsed: aiResponse.modelUsed,
+      fallbackTriggered: aiResponse.fallbackTriggered,
+      visualData: aiResponse.visualData
     });
 
   } catch (error) {
-
-    console.error("AI CONTROLLER CRASH:", error);
-
+    console.error('[AI CONTROLLER] Unhandled crash:', error.message);
     return res.status(500).json({
       success: false,
-      message: "AI generation failed",
-      error: error.message
+      reply: 'AI generation failed. Please try again.',
+      response: 'AI generation failed. Please try again.',
+      modelUsed: 'error',
+      fallbackTriggered: true,
+      message: error.message
     });
   }
 };

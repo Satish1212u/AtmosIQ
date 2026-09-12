@@ -37,7 +37,14 @@ export const generateAIResponse = async (
 
     console.log("FULL API RESPONSE:", response.data);
 
-    return response.data;
+    const payload = response.data || {};
+    const replyText = payload.reply || payload.response || '';
+
+    return {
+      ...payload,
+      reply: replyText,
+      response: replyText
+    };
 
   } catch (error) {
     let friendlyMessage = "The AI assistant is temporarily unavailable. Please make sure the backend server is running on port 5000.";
@@ -71,6 +78,7 @@ export const generateAIResponse = async (
       success: false,
       modelUsed: 'local-frontend-fallback',
       reply: friendlyMessage,
+      response: friendlyMessage,
       fallbackTriggered: true
     };
   }

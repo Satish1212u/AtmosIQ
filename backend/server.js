@@ -14,16 +14,11 @@ const httpServer = createServer(app);
 initSocket(httpServer);
 
 if (process.env.MONGO_URI) {
-  /*
-  connectDB();
-  */
-  try {
-     logger.info('Skipping MongoDB temporarily...');
-  } catch (error) {
-     logger.error(error.message);
-  }
+  connectDB().catch((err) => {
+    logger.warn(`⚠️ MongoDB connection attempt failed: ${err.message}. Backend running in DB-free mode.`);
+  });
 } else {
-  logger.warn('MongoDB skipped');
+  logger.warn('⚠️ MONGO_URI not configured. Operating in database-free development mode (AI & Weather telemetry active).');
 }
 
 const server = httpServer.listen(PORT, () => {
@@ -35,8 +30,10 @@ const shutdown = () => {
   logger.info('🛑 Received shutdown signal. Closing server...');
   server.close(async () => {
     logger.info('HTTP server closed.');
-    await mongoose.connection.close();
-    logger.info('Database connection closed.');
+    if (mongoose.connection.readyState === 1) {
+      await mongoose.connection.close();
+      logger.info('Database connection closed.');
+    }
     process.exit(0);
   });
 

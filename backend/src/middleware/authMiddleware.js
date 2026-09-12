@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { ApiError, catchAsync } from './errorMiddleware.js';
 import User from '../models/userModel.js';
+import { isDbConnected } from '../config/db.js';
 
 /**
  * Middleware to protect routes - ensures user is logged in
@@ -20,7 +21,12 @@ export const protect = catchAsync(async (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET || process.env.JWT_SECRET);
     
-    // 2. Check if user still exists
+    // 2. Check database status before querying
+    if (!isDbConnected()) {
+      throw new ApiError(503, 'Database service is currently unavailable. Please try again later.');
+    }
+
+    // 3. Check if user still exists
     const currentUser = await User.findById(decoded.id);
     if (!currentUser) {
       throw new ApiError(401, 'The user belonging to this token no longer exists');

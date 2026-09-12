@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
-import { CloudLightning, Bot, MapPin, ArrowRight, Wind, Droplets, Sun, Moon, CloudRain, Sunrise, Sunset, Activity, Mic, Zap, BarChart3, Globe2 } from 'lucide-react';
+import { 
+  CloudLightning, Bot, MapPin, ArrowRight, Wind, Sun, 
+  Sunrise, Sunset, Sparkles, BarChart3, Mic, Compass 
+} from 'lucide-react';
 import { useWeather } from '../context/WeatherContext';
 import { getAQIStatus } from '../utils/aqiUtils';
 import FloatingTelemetry from '../animations/FloatingTelemetry';
-import CityHeroImage from '../components/CityHeroImage';
+import LuxuryAtmosphereGlobe from '../components/3d/LuxuryAtmosphereGlobe';
 
 const Home = () => {
   const { weather, airQuality, requestLocation, loading, locationError } = useWeather();
@@ -18,9 +21,8 @@ const Home = () => {
   };
 
   const condition = weather?.weather?.[0]?.main || 'Clear';
-  const temp = weather ? Math.round(weather.main?.temp) : 0;
+  const temp = weather ? Math.round(weather.main?.temp) : 22;
   const isNight = weather?.weather?.[0]?.icon?.includes('n');
-  const country = weather?.sys?.country || '';
 
   // AI recommendations logic
   const aiRecommendations = useMemo(() => {
@@ -29,19 +31,19 @@ const Home = () => {
     const aqiVal = airQuality?.list?.[0]?.main?.aqi;
     const components = airQuality?.list?.[0]?.components;
     const aqiStatus = aqiVal !== undefined && aqiVal !== null ? getAQIStatus(aqiVal, components) : null;
-    const aqiText = aqiStatus ? `AQI is ${aqiStatus.value} (${aqiStatus.label}) - ${aqiStatus.recommendation}` : 'Air quality data currently unavailable.';
+    const aqiText = aqiStatus ? `AQI is ${aqiStatus.value} (${aqiStatus.label}) - ${aqiStatus.recommendation}` : 'Atmospheric air quality within nominal thresholds.';
 
-    if (condition === 'Rain' || condition === 'Drizzle') return [`Heavy rain detected. Best to stay indoors. ☔. ${aqiText}`, 'Carry an umbrella if heading out.', 'Perfect time for a hot coffee. ☕'];
-    if (condition === 'Clear' && !isNight) return [`UV index might be high. Wear sunscreen. ☀️. ${aqiText}`, 'Perfect weather for an outdoor run!', 'Clear skies ahead for the next 4 hours.'];
-    if (isNight) return [`Clear night ahead. Good conditions for stargazing. ✨. ${aqiText}`, 'Temperatures dropping, grab a jacket if heading out.', 'Quiet evening detected.'];
-    return [`Stable conditions detected. ${aqiText}`, 'Great time for a workout. 🏃‍♂️', `AQI Status: ${aqiStatus ? aqiStatus.label : 'Good'}`];
+    if (condition === 'Rain' || condition === 'Drizzle') return [`Precipitation detected in your region. ${aqiText}`, 'Carry a waterproof mantle if stepping out.', 'Ideal atmospheric conditions for indoor contemplation.'];
+    if (condition === 'Clear' && !isNight) return [`Solar radiance elevated. UV protection recommended. ${aqiText}`, 'Exceptional atmospheric clarity for travel and outdoor pursuits.', 'Clear horizon sustained across the upcoming 4 hours.'];
+    if (isNight) return [`Crystalline celestial sky. Optimal visibility for astronomical observation. ${aqiText}`, 'Ambient temperature declining; layer accordingly.', 'Quiet atmospheric stillness detected.'];
+    return [`Atmospheric equilibrium sustained. ${aqiText}`, 'Favorable meteorological metrics across all vectors.', `Atmospheric AQI: ${aqiStatus ? aqiStatus.label : 'Nominal'}`];
   }, [condition, weather, isNight, airQuality]);
 
   useEffect(() => {
     if (weather) {
       setIsTyping(true);
       let currentText = "";
-      const textToType = aiRecommendations[0];
+      const textToType = aiRecommendations[0] || "Atmospheric intelligence synchronized.";
       let i = 0;
       setAiText("");
       const typingInterval = setInterval(() => {
@@ -53,282 +55,271 @@ const Home = () => {
           clearInterval(typingInterval);
           setIsTyping(false);
         }
-      }, 50);
+      }, 35);
       return () => clearInterval(typingInterval);
     }
   }, [weather, aiRecommendations]);
 
+  // Loading Screen (Luxury Atelier Aesthetic)
   if (loading) {
     return (
       <div className="relative min-h-[calc(100vh-80px)] flex flex-col items-center justify-center px-6 overflow-hidden bg-transparent">
         <div className="relative flex items-center justify-center w-40 h-40 mb-8">
-          <motion.div animate={{ scale: [1, 2, 1], opacity: [0.1, 0.5, 0.1] }} transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }} className="absolute inset-0 bg-cyan-500/30 rounded-full blur-2xl" />
-          <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 2, ease: "linear" }} className="absolute w-24 h-24 rounded-full border-t-4 border-l-4 border-cyan-400 border-r-transparent border-b-transparent" />
-          <motion.div animate={{ rotate: -360 }} transition={{ repeat: Infinity, duration: 4, ease: "linear" }} className="absolute w-32 h-32 rounded-full border-b-2 border-r-2 border-blue-500 border-l-transparent border-t-transparent" />
+          <motion.div 
+            animate={{ scale: [1, 1.3, 1], opacity: [0.15, 0.35, 0.15] }} 
+            transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }} 
+            className="absolute inset-0 bg-[#C5A880]/20 rounded-full blur-2xl" 
+          />
+          <motion.div 
+            animate={{ rotate: 360 }} 
+            transition={{ repeat: Infinity, duration: 3, ease: "linear" }} 
+            className="absolute w-24 h-24 rounded-full border-t-2 border-l-2 border-[#B89758] border-r-transparent border-b-transparent" 
+          />
+          <motion.div 
+            animate={{ rotate: -360 }} 
+            transition={{ repeat: Infinity, duration: 5, ease: "linear" }} 
+            className="absolute w-32 h-32 rounded-full border-b border-r border-[#C5A880]/50 border-l-transparent border-t-transparent" 
+          />
           <img
             src="/logo.png"
             alt="AtmosIQ Logo"
-            className="w-16 h-16 absolute z-10 animate-pulse drop-shadow-[0_0_20px_rgba(34,211,238,0.8)] object-contain scale-110"
+            className="w-12 h-12 absolute z-10 object-contain drop-shadow-md"
           />
         </div>
-        <h2 className="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-400 to-indigo-400 tracking-tight text-glow animate-pulse">
-          Loading AtmosIQ...
+        <h2 className="text-2xl md:text-3xl font-editorial font-bold text-[#1C1917] tracking-wider">
+          CALIBRATING ATMOSPHERIC SENSORS...
         </h2>
-        <p className="text-slate-400 mt-4 font-medium animate-pulse">Fetching your local weather data</p>
+        <p className="text-[#786E65] mt-3 text-xs font-roman tracking-[0.2em] uppercase">
+          Synchronizing Real-Time Telemetry Arrays
+        </p>
       </div>
     );
   }
 
+  // Location Access Prompt Screen
   if (!weather) {
     return (
       <div className="relative min-h-[calc(100vh-80px)] flex flex-col items-center justify-center px-6 overflow-hidden bg-transparent">
-        {/* Animated Mesh Gradients */}
-        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
-          <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] bg-cyan-600/20 rounded-full blur-[120px] animate-blob"></div>
-          <div className="absolute top-[20%] -right-[10%] w-[40%] h-[60%] bg-indigo-600/20 rounded-full blur-[120px] animate-blob" style={{ animationDelay: '2s' }}></div>
-          <div className="absolute -bottom-[20%] left-[20%] w-[60%] h-[50%] bg-blue-600/20 rounded-full blur-[120px] animate-blob" style={{ animationDelay: '4s' }}></div>
-        </div>
-
         <motion.div
-          initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, type: "spring", stiffness: 40 }}
-          className="z-10 flex flex-col items-center text-center max-w-3xl mx-auto glass-dark p-10 md:p-14 rounded-[3rem] shadow-[0_0_80px_rgba(56,189,248,0.15)] relative overflow-hidden backdrop-blur-2xl border border-white/10 group"
+          initial={{ opacity: 0, y: 30 }} 
+          animate={{ opacity: 1, y: 0 }} 
+          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+          className="z-10 flex flex-col items-center text-center max-w-2xl mx-auto luxury-panel p-10 md:p-14 rounded-[2.5rem] relative overflow-hidden"
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
-
           <motion.div
-            animate={{ scale: [1, 1.05, 1], rotate: [0, 5, -5, 0] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-            className="w-24 h-24 rounded-3xl bg-slate-950/70 border border-cyan-500/40 flex items-center justify-center mb-8 shadow-[0_0_40px_rgba(56,189,248,0.4)] relative z-10 overflow-hidden"
+            animate={{ scale: [1, 1.04, 1] }} 
+            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+            className="w-20 h-20 rounded-2xl bg-[#FAF8F5] border border-[#C5A880]/40 flex items-center justify-center mb-8 shadow-sm relative z-10"
           >
-            <div className="absolute inset-0 bg-cyan-500/10 rounded-3xl blur animate-pulse-slow"></div>
             <img
               src="/logo.png"
               alt="AtmosIQ Logo"
-              className="w-14 h-14 object-contain relative z-10 scale-125"
+              className="w-12 h-12 object-contain"
             />
           </motion.div>
 
-          <h1 className="text-5xl md:text-7xl font-black tracking-tighter mb-6 leading-[1.1] text-white drop-shadow-2xl">
-            AI-Powered <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-400 text-glow-cyan">Climate Intelligence.</span>
+          <span className="text-[11px] font-roman tracking-[0.25em] text-[#8C6D3F] uppercase mb-3">
+            ATELIER EDITION · NO. 01
+          </span>
+
+          <h1 className="text-4xl md:text-6xl font-editorial font-bold tracking-tight mb-6 text-[#1C1917] leading-[1.1]">
+            Spatial Climate <br />
+            <span className="italic font-normal text-[#B89758]">Intelligence.</span>
           </h1>
 
-          <p className="text-lg md:text-xl text-slate-100 mb-12 leading-relaxed max-w-xl font-semibold">
-            AtmosIQ uses real-time weather data and AI to give you accurate forecasts, air quality insights, and personalized recommendations — all in one beautiful interface.
+          <p className="text-base md:text-lg text-[#57493A] mb-10 leading-relaxed max-w-lg font-normal">
+            AtmosIQ orchestrates hyper-local meteorological telemetry, live air quality diagnostics, and conversational AI advisory into a refined spatial experience.
           </p>
 
           {locationError && (
-            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-orange-400 mb-8 bg-orange-500/10 p-4 rounded-2xl border border-orange-500/20 max-w-md backdrop-blur-md">
-              <p className="font-bold text-orange-300 mb-1 flex items-center justify-center gap-2"><MapPin className="w-4 h-4" /> Location Access Denied</p>
-              <p className="text-sm">Search for a city manually using the top bar to continue.</p>
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-[#8C4A20] mb-8 bg-[#FAF0E6] p-4 rounded-2xl border border-[#E8C4A2] max-w-md text-xs font-medium">
+              <p className="font-bold mb-1 flex items-center justify-center gap-1.5"><MapPin className="w-3.5 h-3.5" /> Geographic Access Restricted</p>
+              <p>You may use the navigation search bar to specify any global destination.</p>
             </motion.div>
           )}
 
-          <div className="flex flex-col sm:flex-row items-center gap-6 w-full justify-center relative z-10">
-            <motion.button
-              onClick={handleAllowLocation} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-              className="magnetic-btn w-full sm:w-auto px-10 py-5 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold flex items-center justify-center gap-3 shadow-[0_0_30px_rgba(56,189,248,0.5)] hover:shadow-[0_0_50px_rgba(56,189,248,0.8)] border border-cyan-400/50 text-lg tracking-wide"
-            >
-              <span className="absolute inset-0 w-full h-full bg-white/20 -translate-x-full group-hover:animate-shimmer skew-x-12"></span>
-              <MapPin className="w-5 h-5 relative z-10" />
-              <span className="relative z-10">Allow Location Access</span>
-            </motion.button>
-          </div>
+          <motion.button
+            onClick={handleAllowLocation} 
+            whileHover={{ scale: 1.02 }} 
+            whileTap={{ scale: 0.98 }}
+            className="luxury-gold-btn px-9 py-4 rounded-full font-bold flex items-center justify-center gap-3 text-sm tracking-wide shadow-md"
+          >
+            <MapPin className="w-4 h-4" />
+            <span>Enable Local Telemetry</span>
+          </motion.button>
         </motion.div>
       </div>
     );
   }
 
-  // Heading options based on weather
-  const getPremiumHeading = () => {
-    if (condition === 'Rain') return "Rain in the Forecast Today";
-    if (condition === 'Clear' && !isNight) return "Clear Skies at Your Location";
-    if (isNight) return "Clear Night Ahead";
-    if (condition === 'Clouds') return "Partly Cloudy Conditions";
-    return "Your Local Weather";
+  const getEditorialHeading = () => {
+    if (condition === 'Rain') return "Precipitation in Your Horizon";
+    if (condition === 'Clear' && !isNight) return "Crystalline Solar Conditions";
+    if (isNight) return "Celestial Atmospheric Stillness";
+    if (condition === 'Clouds') return "Layered Atmospheric Cloud Strata";
+    return "Local Atmospheric Telemetry";
   };
 
   return (
-    <div className="relative min-h-[calc(100vh-80px)] flex flex-col lg:flex-row items-center justify-center px-6 lg:px-16 xl:px-24 overflow-hidden gap-12 lg:gap-20 z-10 bg-transparent">
-
-      {/* ══ CITY HERO BACKGROUND ══
-          Full-screen cinematic animated climate backdrops and dynamic particle
-          systems synchronized with current weather condition. */}
-      <div className="absolute inset-0 z-0">
-        <CityHeroImage
-          city={weather.name}
-          country={country}
-          condition={condition}
-          isNight={isNight}
-          className="w-full h-full"
-        />
-      </div>
-
-      {/* Mesh glow behind the main content */}
-      <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-cyan-500/15 rounded-full blur-[150px] mix-blend-screen pointer-events-none z-[1] animate-blob"></div>
-
-      {/* Futuristic Ambient Climate Telemetry HUD */}
+    <div className="relative min-h-[calc(100vh-80px)] flex flex-col lg:flex-row items-center justify-between px-6 lg:px-14 xl:px-20 overflow-hidden gap-12 lg:gap-14 z-10 bg-transparent py-10">
+      
+      {/* 3D Horological Floating Telemetry Nodes */}
       <FloatingTelemetry />
 
-      {/* Left Content - AI & CTA */}
+      {/* Left Column: Editorial Headline, 3D Globe Teaser, and AI Advisory */}
       <motion.div
-        initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 1, ease: "easeOut" }}
-        className="flex-1 flex flex-col items-start text-left max-w-2xl relative z-10 w-full mt-10 lg:mt-0"
+        initial={{ opacity: 0, x: -40 }} 
+        animate={{ opacity: 1, x: 0 }} 
+        transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+        className="flex-1 flex flex-col items-start text-left max-w-2xl relative z-10 w-full"
       >
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.5 }}
-          className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full glass-dark mb-8 text-sm font-bold text-cyan-300 border-cyan-400/40 backdrop-blur-xl shadow-[0_0_20px_rgba(56,189,248,0.2)]"
-        >
-          <span className="relative flex h-3 w-3">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-3 w-3 bg-cyan-500"></span>
+        {/* Status Chip */}
+        <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/85 border border-[#C5A880]/30 mb-6 shadow-sm backdrop-blur-md">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#B89758] opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-[#B89758]"></span>
           </span>
-          <span className="tracking-widest uppercase text-xs">Live · {weather.name}</span>
-        </motion.div>
+          <span className="text-[10px] font-roman tracking-[0.2em] text-[#786E65] uppercase">
+            LIVE TELEMETRY · {weather.name}
+          </span>
+        </div>
 
-        <h1 className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black tracking-tighter mb-4 leading-[1.05] text-white drop-shadow-2xl">
-          {getPremiumHeading().split(' ').map((word, i) => (
-            <span key={i} className={i % 2 === 1 ? "text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-500" : ""}>{word} </span>
+        {/* Editorial Serif Headline */}
+        <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-editorial font-bold tracking-tight mb-4 text-[#1C1917] leading-[1.08]">
+          {getEditorialHeading().split(' ').map((word, i) => (
+            <span key={i} className={i % 2 === 1 ? "text-[#B89758] italic font-normal" : ""}>
+              {word}{' '}
+            </span>
           ))}
         </h1>
 
-        {/* AI Typing Banner */}
-        <div className="glass-dark border-l-4 border-cyan-500 px-6 py-4 rounded-2xl mb-10 w-full max-w-xl backdrop-blur-xl shadow-lg mt-6 relative overflow-hidden group">
-          <div className="absolute top-0 right-0 p-3 opacity-50 group-hover:opacity-100 transition-opacity"><Bot className="w-5 h-5 text-cyan-400" /></div>
-          <p className="text-sm font-bold text-cyan-400 uppercase tracking-wider mb-2 flex items-center gap-2">
-            <Zap className="w-4 h-4" /> AI Analysis
-          </p>
-          <p className="text-lg text-slate-200 font-medium min-h-[28px] flex items-center">
+        {/* AI Typing Advisory Banner */}
+        <div className="luxury-panel border-l-2 border-[#B89758] px-6 py-4 rounded-2xl mb-8 w-full max-w-xl shadow-sm relative overflow-hidden mt-3">
+          <div className="flex items-center justify-between mb-1.5">
+            <p className="text-[10px] font-roman tracking-[0.2em] text-[#8C6D3F] uppercase flex items-center gap-1.5 font-bold">
+              <Sparkles className="w-3.5 h-3.5 text-[#B89758]" /> Atmospheric Intelligence
+            </p>
+            <Bot className="w-4 h-4 text-[#B89758]/60" />
+          </div>
+          <p className="text-sm md:text-base text-[#443E38] font-medium min-h-[30px] leading-relaxed">
             {aiText}
-            {isTyping && <span className="inline-block w-2 h-5 bg-cyan-400 ml-1 animate-pulse"></span>}
+            {isTyping && <span className="inline-block w-1.5 h-4 bg-[#B89758] ml-1 animate-pulse"></span>}
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center gap-5 w-full">
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row items-center gap-4 w-full">
           <Link to="/dashboard" className="w-full sm:w-auto">
             <motion.button
-              whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-              className="magnetic-btn w-full px-8 py-4 rounded-2xl bg-white text-slate-900 font-bold flex items-center justify-center gap-3 hover:bg-slate-100 transition-colors shadow-[0_0_30px_rgba(255,255,255,0.3)] hover:shadow-[0_0_40px_rgba(255,255,255,0.5)] border border-transparent"
+              whileHover={{ scale: 1.02 }} 
+              whileTap={{ scale: 0.98 }}
+              className="luxury-gold-btn w-full px-8 py-3.5 rounded-full font-bold flex items-center justify-center gap-2.5 text-xs font-roman tracking-wider"
             >
-              <BarChart3 className="w-5 h-5" />
-              Launch Dashboard
+              <BarChart3 className="w-4 h-4" />
+              EXPLORE DASHBOARD
             </motion.button>
           </Link>
 
           <Link to="/assistant" className="w-full sm:w-auto">
             <motion.button
-              whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-              className="magnetic-btn w-full px-8 py-4 rounded-2xl glass-dark font-bold flex items-center justify-center gap-3 hover:bg-white/10 transition-colors border-white/20 shadow-[0_0_20px_rgba(0,0,0,0.4)] hover:shadow-[0_0_30px_rgba(56,189,248,0.2)] hover:border-cyan-400/50"
+              whileHover={{ scale: 1.02 }} 
+              whileTap={{ scale: 0.98 }}
+              className="luxury-ghost-btn w-full px-8 py-3.5 rounded-full font-bold flex items-center justify-center gap-2.5 text-xs font-roman tracking-wider"
             >
-              <Mic className="w-5 h-5 text-cyan-400 group-hover:animate-pulse" />
-              AI Assistant
-              <ArrowRight className="w-4 h-4 ml-2 opacity-50" />
+              <Mic className="w-4 h-4 text-[#B89758]" />
+              AI ASSISTANT
+              <ArrowRight className="w-3.5 h-3.5 ml-1 opacity-60" />
             </motion.button>
           </Link>
         </div>
       </motion.div>
 
-      {/* Right Content - Advanced Live Card */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8, rotateY: 15 }} animate={{ opacity: 1, scale: 1, rotateY: 0 }} transition={{ duration: 1.2, type: "spring", stiffness: 50 }}
-        style={{ perspective: 1000 }}
-        className="flex-1 flex justify-center lg:justify-end w-full relative z-10"
-      >
+      {/* Center/Right Column: Three.js Interactive 3D Globe & Weather Complication */}
+      <div className="flex-1 flex flex-col items-center lg:items-end justify-center w-full relative z-10 gap-6">
+        
+        {/* Three.js Interactive Atmospheric Globe */}
         <motion.div
-          animate={{ y: [-15, 15, -15] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          className="glass-dark rounded-[2.5rem] p-8 lg:p-10 border border-white/10 shadow-[0_30px_60px_rgba(0,0,0,0.6)] backdrop-blur-3xl w-full max-w-lg relative overflow-hidden group"
+          initial={{ opacity: 0, scale: 0.9 }} 
+          animate={{ opacity: 1, scale: 1 }} 
+          transition={{ duration: 1.2, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          className="w-full max-w-md flex items-center justify-center"
         >
-          {/* Card Inner Glow */}
-          <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-50 pointer-events-none"></div>
-          <div className="absolute -top-32 -right-32 w-64 h-64 bg-cyan-500/30 blur-[80px] rounded-full pointer-events-none group-hover:bg-cyan-400/40 transition-colors duration-500"></div>
+          <LuxuryAtmosphereGlobe 
+            condition={condition}
+            temp={temp}
+            city={weather.name}
+            className="w-full aspect-square"
+          />
+        </motion.div>
 
-          <div className="relative z-10 flex justify-between items-start mb-6">
+        {/* Physical Meteorological Chronometer Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }} 
+          animate={{ opacity: 1, y: 0 }} 
+          transition={{ duration: 1, delay: 0.4 }}
+          className="luxury-card-3d rounded-3xl p-6 md:p-8 w-full max-w-md relative overflow-hidden"
+        >
+          <div className="flex justify-between items-start mb-4">
             <div>
-              <p className="text-slate-300 font-extrabold tracking-wide uppercase text-xs mb-2">Weather Now</p>
-              <h2 className="text-4xl font-extrabold text-white flex items-center gap-2">
+              <span className="text-[10px] font-roman text-[#786E65] tracking-[0.2em] uppercase block mb-1">
+                STATION CHRONOMETER
+              </span>
+              <h2 className="text-2xl font-editorial font-bold text-[#1C1917]">
                 {weather.name}
               </h2>
             </div>
-            <motion.img
-              animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 4, repeat: Infinity }}
-              src={`https://openweathermap.org/img/wn/${weather.weather?.[0]?.icon}@4x.png`}
-              alt="Weather Icon"
-              className="w-28 h-28 -mt-8 -mr-6 drop-shadow-[0_0_25px_rgba(255,255,255,0.4)]"
+            <img 
+              src={`https://openweathermap.org/img/wn/${weather.weather?.[0]?.icon}@2x.png`}
+              alt="Condition"
+              className="w-14 h-14 -mt-2 -mr-2 object-contain opacity-85"
             />
           </div>
 
-          <div className="relative z-10 mb-8 flex items-end gap-4">
-            <div className="text-8xl md:text-9xl font-black tracking-tighter text-white drop-shadow-lg leading-none">
-              {temp}
-            </div>
-            <div className="pb-3">
-              <span className="text-5xl text-cyan-400 block leading-none font-bold">°C</span>
-              <p className="text-sm text-slate-200 capitalize mt-2 font-bold bg-white/10 px-3.5 py-1.5 rounded-full border border-white/20 inline-block">{weather.weather?.[0]?.description}</p>
+          <div className="flex items-baseline gap-3 mb-6">
+            <span className="text-6xl md:text-7xl font-editorial font-bold text-[#1C1917] tracking-tight">
+              {temp}°
+            </span>
+            <div className="text-xs text-[#57493A] font-medium capitalize">
+              <span className="text-[#8C6D3F] font-bold block">{weather.weather?.[0]?.description}</span>
+              Feels like {Math.round(weather.main?.feels_like)}°C
             </div>
           </div>
 
-          <div className="relative z-10 grid grid-cols-2 gap-4">
-            <div className="bg-slate-950/75 rounded-2xl p-4 flex flex-col justify-between border border-white/10 hover:border-cyan-400/40 transition-colors shadow-inner group/card">
-              <div className="flex items-center gap-2 mb-2">
-                <CloudLightning className="w-5 h-5 text-cyan-400 group-hover/card:scale-110 transition-transform" />
-                <p className="text-xs text-slate-300 font-extrabold uppercase tracking-wider">Feels Like</p>
-              </div>
-              <p className="text-2xl font-bold text-white">{Math.round(weather.main?.feels_like)}°C</p>
-            </div>
-            <div className="bg-slate-950/75 rounded-2xl p-4 flex flex-col justify-between border border-white/10 hover:border-blue-400/40 transition-colors shadow-inner group/card">
-              <div className="flex items-center gap-2 mb-2">
-                <Wind className="w-5 h-5 text-blue-400 group-hover/card:scale-110 transition-transform" />
-                <p className="text-xs text-slate-300 font-extrabold uppercase tracking-wider">Wind (m/s)</p>
-              </div>
-              <div className="flex items-center justify-between">
-                <p className="text-2xl font-bold text-white">{Math.round(weather.wind?.speed || 0)}</p>
-                <div className="w-8 h-8 rounded-full border border-white/15 flex items-center justify-center bg-white/10" style={{ transform: `rotate(${weather.wind?.deg}deg)` }}>
-                  <ArrowRight className="w-4 h-4 text-slate-300 -rotate-90" />
-                </div>
+          {/* Micro-complications Grid */}
+          <div className="grid grid-cols-2 gap-3 pt-4 border-t border-[#C5A880]/20">
+            <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-white/70 border border-[#C5A880]/20">
+              <Wind className="w-4 h-4 text-[#B89758]" />
+              <div>
+                <span className="text-[9px] font-roman text-[#786E65] uppercase block">WIND SPEED</span>
+                <span className="text-xs font-bold text-[#1C1917]">{Math.round(weather.wind?.speed || 0)} m/s</span>
               </div>
             </div>
-            <div className="bg-slate-950/75 rounded-2xl p-4 flex items-center justify-between border border-white/10 hover:border-orange-400/40 transition-colors shadow-inner group/card col-span-2">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-orange-500/20 rounded-xl">
-                  <Sunrise className="w-5 h-5 text-orange-400" />
-                </div>
-                <div>
-                  <p className="text-xs text-slate-300 font-extrabold uppercase">Sunrise</p>
-                  <p className="text-lg font-bold text-white">{new Date(weather.sys?.sunrise * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                </div>
-              </div>
-              <div className="h-8 w-px bg-white/15"></div>
-              <div className="flex items-center gap-3 text-right">
-                <div>
-                  <p className="text-xs text-slate-300 font-extrabold uppercase">Sunset</p>
-                  <p className="text-lg font-bold text-white">{new Date(weather.sys?.sunset * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                </div>
-                <div className="p-2 bg-indigo-500/20 rounded-xl">
-                  <Sunset className="w-5 h-5 text-indigo-400" />
-                </div>
+
+            <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-white/70 border border-[#C5A880]/20">
+              <Sunrise className="w-4 h-4 text-[#C68A4C]" />
+              <div>
+                <span className="text-[9px] font-roman text-[#786E65] uppercase block">SUNRISE</span>
+                <span className="text-xs font-bold text-[#1C1917]">
+                  {new Date(weather.sys?.sunrise * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </span>
               </div>
             </div>
+          </div>
+
+          {/* Mini Radar Interactive Preview Link */}
+          <div 
+            onClick={() => navigate('/radar')}
+            className="mt-4 pt-3 flex items-center justify-between border-t border-[#C5A880]/15 cursor-pointer group"
+          >
+            <span className="text-[10px] font-roman tracking-wider text-[#6B5E51] group-hover:text-[#B89758] transition-colors flex items-center gap-1.5">
+              <Compass className="w-3.5 h-3.5 text-[#B89758]" /> OPEN GEOSPATIAL RADAR TERMINAL
+            </span>
+            <ArrowRight className="w-3.5 h-3.5 text-[#B89758] group-hover:translate-x-1 transition-transform" />
           </div>
         </motion.div>
 
-        {/* Floating Mini Map/Radar Widget */}
-        <motion.div
-          initial={{ opacity: 0, x: 50, y: 50 }} animate={{ opacity: 1, x: 0, y: 0 }} transition={{ delay: 1, type: "spring" }}
-          className="absolute -bottom-6 -right-6 lg:-right-10 glass-dark p-1.5 rounded-[1.5rem] border-cyan-400/30 shadow-[0_15px_40px_rgba(0,0,0,0.5)] backdrop-blur-2xl flex items-center justify-center hover:scale-105 transition-transform cursor-pointer group z-20"
-          onClick={() => navigate('/radar')}
-        >
-          <div className="w-32 h-32 rounded-2xl overflow-hidden relative">
-            <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=600&auto=format&fit=crop" alt="Radar Map" className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-3">
-              <div className="flex items-center gap-1.5 mb-1">
-                <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-ping"></span>
-                <p className="text-[10px] font-bold text-white uppercase tracking-wider">Live Radar</p>
-              </div>
-            </div>
-            {/* Radar Sweep Effect */}
-            <div className="absolute top-1/2 left-1/2 w-full h-full origin-top-left -translate-x-1/2 -translate-y-1/2 border-l border-cyan-400/50 bg-gradient-to-r from-cyan-400/20 to-transparent animate-[spin_4s_linear_infinite]" style={{ clipPath: 'polygon(0 0, 100% 0, 100% 100%)' }}></div>
-          </div>
-        </motion.div>
+      </div>
 
-      </motion.div>
     </div>
   );
 };

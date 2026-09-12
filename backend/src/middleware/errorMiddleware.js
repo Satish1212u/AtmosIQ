@@ -29,6 +29,22 @@ export const notFound = (req, res, next) => {
  * Global Error Handler Middleware
  */
 export const errorHandler = (err, req, res, next) => {
+  // CORS policy rejection
+  if (err.message && err.message.includes('CORS policy does not allow access')) {
+    return res.status(403).json({
+      success: false,
+      message: err.message
+    });
+  }
+
+  // Database disconnection/buffering failure
+  if (err.name === 'MongooseError' || err.message?.includes('buffering timed out') || err.message?.includes('Client must be connected')) {
+    return res.status(503).json({
+      success: false,
+      message: 'Database service is currently unavailable. Please try again later.'
+    });
+  }
+
   // Capture native error status, or res status if set, defaulting to 500
   const statusCode = err.statusCode || err.status || (res.statusCode === 200 ? 500 : res.statusCode);
 

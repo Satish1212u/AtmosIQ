@@ -127,94 +127,72 @@ const FloatingTelemetry = () => {
   const aqiStatus   = getAQIStatus(aqiVal, components);
   const aqiScore    = aqiStatus?.value ?? 25;
 
-  /* The 5 hero-center nodes — exact layout matching reference */
+  /* The 5 hero-center nodes — luxury horological watchmaking dials */
   const nodes = [
     {
       id: 'cloudMoon',
       label: 'CLOUD COVER',
       value: `${clouds}%`,
-      color: 'cyan',
-      /* Top-center */
-      style: {
-        top: '6%',
-        left: '50%',
-        transform: 'translateX(-50%)',
-      },
-      pxMult: { x: 8,   y: 12  },
+      style: { top: '6%', left: '50%', transform: 'translateX(-50%)' },
+      pxMult: { x: 8, y: 12 },
       floatDuration: 7,
       delay: 0,
-      glowColor: 'rgba(34,211,238,0.55)',
-      borderColor: 'rgba(34,211,238,0.55)',
-      bgColor: 'rgba(8,47,73,0.55)',
+      glowColor: 'rgba(197, 168, 128, 0.35)',
+      borderColor: 'rgba(197, 168, 128, 0.45)',
+      bgColor: 'rgba(255, 255, 255, 0.88)',
+      accentColor: '#B89758',
     },
     {
       id: 'windFlow',
       label: 'WIND FLOW',
       value: `${Math.round(windSpeed)} m/s`,
-      color: 'sky',
-      /* Upper-right center */
-      style: {
-        top: '22%',
-        right: '6%',
-      },
+      style: { top: '22%', right: '6%' },
       pxMult: { x: -18, y: -12 },
       floatDuration: 9,
       delay: 1.2,
-      glowColor: 'rgba(56,189,248,0.50)',
-      borderColor: 'rgba(56,189,248,0.55)',
-      bgColor: 'rgba(7,45,85,0.55)',
+      glowColor: 'rgba(197, 168, 128, 0.3)',
+      borderColor: 'rgba(197, 168, 128, 0.45)',
+      bgColor: 'rgba(255, 255, 255, 0.88)',
+      accentColor: '#A08048',
     },
     {
       id: 'rainCloud',
       label: 'HUMIDITY',
       value: `${humidity}%`,
-      color: 'blue',
-      /* Dead center — slightly right */
-      style: {
-        top: '45%',
-        left: '52%',
-        transform: 'translateY(-50%)',
-      },
-      pxMult: { x: 14,  y: 18  },
+      style: { top: '45%', left: '52%', transform: 'translateY(-50%)' },
+      pxMult: { x: 14, y: 18 },
       floatDuration: 8,
       delay: 0.6,
-      glowColor: 'rgba(96,165,250,0.55)',
-      borderColor: 'rgba(96,165,250,0.55)',
-      bgColor: 'rgba(10,30,80,0.55)',
+      glowColor: 'rgba(197, 168, 128, 0.3)',
+      borderColor: 'rgba(197, 168, 128, 0.45)',
+      bgColor: 'rgba(255, 255, 255, 0.88)',
+      accentColor: '#9E7D47',
     },
     {
       id: 'thunderstorm',
       label: 'AQI LEVEL',
       value: `${aqiScore}`,
-      color: 'violet',
-      /* Lower-left center */
-      style: {
-        bottom: '22%',
-        left: '5%',
-      },
-      pxMult: { x: -14, y: 20  },
+      style: { bottom: '22%', left: '5%' },
+      pxMult: { x: -14, y: 20 },
       floatDuration: 10,
       delay: 1.8,
-      glowColor: 'rgba(167,139,250,0.55)',
-      borderColor: 'rgba(167,139,250,0.55)',
-      bgColor: 'rgba(30,10,80,0.55)',
+      glowColor: 'rgba(197, 168, 128, 0.3)',
+      borderColor: 'rgba(197, 168, 128, 0.45)',
+      bgColor: 'rgba(255, 255, 255, 0.88)',
+      accentColor: '#B89758',
     },
     {
       id: 'snow',
       label: 'VISIBILITY',
       value: `${visibility} km`,
-      color: 'indigo',
-      /* Lower-right center */
-      style: {
-        bottom: '12%',
-        right: '5%',
-      },
-      pxMult: { x: 20,  y: -14 },
+      style: { bottom: '12%', right: '5%' },
+      pxMult: { x: 20, y: -14 },
       floatDuration: 7.5,
       delay: 2.4,
-      glowColor: 'rgba(129,140,248,0.55)',
-      borderColor: 'rgba(129,140,248,0.55)',
-      bgColor: 'rgba(15,15,90,0.55)',
+      glowColor: 'rgba(197, 168, 128, 0.3)',
+      borderColor: 'rgba(197, 168, 128, 0.45)',
+      bgColor: 'rgba(255, 255, 255, 0.88)',
+      accentColor: '#8C6D3F',
     },
   ];
 
@@ -290,86 +268,64 @@ const FloatingTelemetry = () => {
                   }}
                 />
 
-                {/* Main glass disk */}
+                {/* Main luxury horological disk */}
                 <div
-                  className="relative w-20 h-20 rounded-full flex items-center justify-center backdrop-blur-md z-10 transition-all duration-300 group-hover:scale-105"
+                  className="relative w-20 h-20 rounded-full flex items-center justify-center backdrop-blur-xl z-10 transition-all duration-300 group-hover:scale-105 shadow-md"
                   style={{
                     background: node.bgColor,
                     border: `1.5px solid ${node.borderColor}`,
-                    boxShadow: `0 0 28px ${node.glowColor}, inset 0 0 16px rgba(255,255,255,0.04)`,
+                    boxShadow: `0 10px 25px -5px rgba(60,45,30,0.08), inset 0 1px 1px rgba(255,255,255,0.9)`,
                   }}
                 >
                   {/* Inner slow-spin calibration ring */}
                   <motion.div
                     animate={{ rotate: -360 }}
-                    transition={{ duration: 28, repeat: Infinity, ease: 'linear' }}
-                    className="absolute inset-1 rounded-full"
+                    transition={{ duration: 32, repeat: Infinity, ease: 'linear' }}
+                    className="absolute inset-1.5 rounded-full"
                     style={{
                       border: `1px dashed ${node.borderColor}`,
-                      opacity: 0.3,
+                      opacity: 0.45,
                     }}
                   />
 
-                  {/* Scan-line sweep */}
-                  <motion.div
-                    className="absolute inset-0 rounded-full overflow-hidden"
-                    aria-hidden="true"
-                  >
-                    <motion.div
-                      animate={{ y: ['-100%', '200%'] }}
-                      transition={{ duration: 3, repeat: Infinity, ease: 'linear', delay: node.delay }}
-                      className="w-full h-1/3"
-                      style={{
-                        background: `linear-gradient(to bottom, transparent, ${node.glowColor}, transparent)`,
-                        opacity: 0.4,
-                      }}
-                    />
-                  </motion.div>
-
-                  {/* THE WEATHER ICON — large, bright, premium */}
+                  {/* THE WEATHER ICON — luxury metallic tone */}
                   <SvgIcon
-                    className="w-10 h-10 relative z-10 transition-transform duration-300 group-hover:scale-110"
+                    className="w-9 h-9 relative z-10 transition-transform duration-300 group-hover:scale-110"
                     style={{
-                      color: node.glowColor.replace('0.55', '0.95'),
-                      filter: `drop-shadow(0 0 10px ${node.glowColor}) drop-shadow(0 0 4px ${node.glowColor})`,
-                      stroke: node.borderColor.replace('0.55', '0.9'),
+                      color: node.accentColor,
+                      stroke: node.accentColor,
                     }}
                   />
                 </div>
 
-                {/* Vertical dotted connector trail */}
-                <div className="relative flex flex-col items-center mt-1.5" style={{ height: 32 }}>
+                {/* Vertical hairline connector trail */}
+                <div className="relative flex flex-col items-center mt-1.5" style={{ height: 28 }}>
                   <motion.div
-                    animate={{ opacity: [0, 1, 0], y: [0, 28, 28] }}
+                    animate={{ opacity: [0, 1, 0], y: [0, 24, 24] }}
                     transition={{ duration: 2.4, repeat: Infinity, ease: 'easeOut', delay: node.delay }}
                     className="absolute top-0 w-1.5 h-1.5 rounded-full"
-                    style={{ background: node.borderColor, boxShadow: `0 0 6px ${node.glowColor}` }}
+                    style={{ background: node.accentColor }}
                   />
                   <div
                     className="w-px"
                     style={{
                       height: '100%',
                       background: `linear-gradient(to bottom, ${node.borderColor}, transparent)`,
-                      opacity: 0.55,
+                      opacity: 0.6,
                     }}
                   />
                 </div>
 
                 {/* Telemetry readout */}
                 <div className="flex flex-col items-center text-center mt-0 pointer-events-none"
-                  style={{ minWidth: 72 }}>
+                  style={{ minWidth: 80 }}>
                   <span
-                    className="text-[9px] font-bold tracking-[0.2em] uppercase transition-colors duration-300 group-hover:opacity-100"
-                    style={{ color: node.borderColor, opacity: 0.75 }}
+                    className="text-[9px] font-roman tracking-[0.22em] uppercase transition-colors duration-300 text-[#786E65]"
                   >
                     {node.label}
                   </span>
                   <span
-                    className="text-[13px] font-black tracking-widest mt-0.5 text-white transition-colors duration-300 group-hover:text-white"
-                    style={{
-                      textShadow: `0 0 8px ${node.glowColor}`,
-                      letterSpacing: '0.12em',
-                    }}
+                    className="text-sm font-editorial font-bold tracking-wider mt-0.5 text-[#1C1917]"
                   >
                     {node.value}
                   </span>

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { User, Mic, MicOff, Zap, CloudSun, Send, Bot, Sparkles } from 'lucide-react';
 import { useWeather } from '../context/WeatherContext';
 import { generateAIResponse } from '../services/aiApi';
+import LuxuryAICore3D from '../components/3d/LuxuryAICore3D';
 
 /* ══════════════════════════════════════════════════════════
    US AQI ESTIMATOR FROM PM2.5 (OWM Compatibility)
@@ -107,51 +108,41 @@ const generateSuggestions = (userMessage, weather, airQuality) => {
 };
 
 /* ══════════════════════════════════════════════════════════
-   COMPACT GLOWING METRICS PILL ROW
+   COMPACT REAL-TIME METRICS ROW
+   Luxury tactile pill badges
    ══════════════════════════════════════════════════════════ */
 const CompactMetricsRow = ({ visualData, currentWeather, currentAQI }) => {
-  let tempVal = visualData?.temp ?? (currentWeather?.main?.temp !== undefined ? Math.round(currentWeather.main.temp) : null);
-
-  let aqiVal = visualData?.AQI?.usAqi ?? null;
-  if (aqiVal === null && currentAQI) {
-    const pm2_5 = currentAQI?.list?.[0]?.components?.pm2_5;
-    const rawAqi = currentAQI?.list?.[0]?.main?.aqi;
-    if (pm2_5 !== undefined) {
-      aqiVal = getUsAQIFromPm25(pm2_5);
-    } else if (rawAqi !== undefined) {
-      const mappings = { 1: 35, 2: 72, 3: 115, 4: 158, 5: 220 };
-      aqiVal = mappings[rawAqi];
-    }
-  }
-
-  let humidityVal = visualData?.humidity ?? (currentWeather?.main?.humidity !== undefined ? currentWeather.main.humidity : null);
-  let windVal = visualData?.windSpeed ?? (currentWeather?.wind?.speed !== undefined ? currentWeather.wind.speed : null);
+  const tempVal = visualData?.temp ?? (currentWeather ? Math.round(currentWeather.main?.temp) : null);
+  const aqiVal = visualData?.aqi ?? currentAQI?.list?.[0]?.main?.aqi ?? null;
+  const humidityVal = visualData?.humidity ?? currentWeather?.main?.humidity ?? null;
+  const windVal = visualData?.wind ?? currentWeather?.wind?.speed ?? null;
 
   if (tempVal === null && aqiVal === null && humidityVal === null && windVal === null) return null;
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 5 }}
+      initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex flex-wrap items-center gap-2 mt-4"
+      transition={{ duration: 0.3 }}
+      className="flex flex-wrap gap-2 pt-2"
     >
       {tempVal !== null && (
-        <span className="flex items-center gap-1 px-3.5 py-1.5 rounded-full text-xs font-semibold font-mono tracking-wide bg-orange-500/10 border border-orange-500/30 text-orange-400 shadow-[0_0_15px_rgba(249,115,22,0.15)] backdrop-blur-sm">
+        <span className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold font-roman tracking-wider bg-white/90 border border-[#C5A880]/30 text-[#8C6D3F] shadow-sm">
           🌡️ {tempVal}°C
         </span>
       )}
       {aqiVal !== null && (
-        <span className="flex items-center gap-1 px-3.5 py-1.5 rounded-full text-xs font-semibold font-mono tracking-wide bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.15)] backdrop-blur-sm">
-          😷 AQI {aqiVal}
+        <span className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold font-roman tracking-wider bg-white/90 border border-[#C5A880]/30 text-[#4E7D63] shadow-sm">
+          🌿 AQI {aqiVal}
         </span>
       )}
       {humidityVal !== null && (
-        <span className="flex items-center gap-1 px-3.5 py-1.5 rounded-full text-xs font-semibold font-mono tracking-wide bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.15)] backdrop-blur-sm">
+        <span className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold font-roman tracking-wider bg-white/90 border border-[#C5A880]/30 text-[#57493A] shadow-sm">
           💧 Humidity {humidityVal}%
         </span>
       )}
       {windVal !== null && (
-        <span className="flex items-center gap-1 px-3.5 py-1.5 rounded-full text-xs font-semibold font-mono tracking-wide bg-purple-500/10 border border-purple-500/30 text-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.15)] backdrop-blur-sm">
+        <span className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold font-roman tracking-wider bg-white/90 border border-[#C5A880]/30 text-[#57493A] shadow-sm">
           💨 Wind {Math.round(windVal)} m/s
         </span>
       )}
@@ -169,23 +160,23 @@ const SmartSuggestions = ({ suggestions, onSelect }) => {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="mt-5 pt-4 border-t border-white/10"
+      className="mt-4 pt-3 border-t border-[#C5A880]/20"
     >
-      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-2">
-        <Sparkles className="w-3 h-3 text-cyan-400" />
-        Explore Next
+      <p className="text-[10px] font-roman tracking-[0.2em] uppercase text-[#786E65] mb-2.5 flex items-center gap-1.5 font-bold">
+        <Sparkles className="w-3 h-3 text-[#B89758]" />
+        EXPLORE NEXT
       </p>
       <div className="flex flex-wrap gap-2">
         {suggestions.map((s, i) => (
           <motion.button
             key={i}
-            initial={{ opacity: 0, scale: 0.88 }}
+            initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: i * 0.06 }}
-            whileHover={{ scale: 1.04, y: -1 }}
-            whileTap={{ scale: 0.96 }}
+            transition={{ delay: i * 0.05 }}
+            whileHover={{ scale: 1.02, y: -1 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => onSelect(s.query)}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl text-[12px] font-bold bg-slate-900/70 border border-white/15 hover:border-cyan-400/50 hover:bg-cyan-950/40 hover:shadow-[0_0_14px_rgba(34,211,238,0.15)] text-slate-200 hover:text-white transition-all duration-300 cursor-pointer backdrop-blur-sm"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-white/80 border border-[#C5A880]/35 hover:border-[#B89758] hover:bg-white text-[#57493A] hover:text-[#1C1917] transition-all shadow-sm cursor-pointer"
           >
             <span className="text-sm leading-none">{s.emoji}</span>
             <span>{s.label}</span>
@@ -213,7 +204,7 @@ const StreamingMessageBubble = ({ text, visualData, suggestions, onComplete, onS
         clearInterval(interval);
         setIsTypingComplete(true);
         onComplete();
-        setTimeout(() => setShowExtras(true), 350);
+        setTimeout(() => setShowExtras(true), 300);
       }
     }, 10);
     return () => clearInterval(interval);
@@ -221,19 +212,19 @@ const StreamingMessageBubble = ({ text, visualData, suggestions, onComplete, onS
 
   return (
     <div className="space-y-3 w-full text-left">
-      <p className="text-slate-100 leading-relaxed font-semibold text-[15px] whitespace-pre-line">
+      <p className="text-[#2C2621] leading-relaxed font-medium text-[15px] whitespace-pre-line">
         {displayedText}
-        {!isTypingComplete && <span className="inline-block w-1.5 h-4 bg-cyan-400 ml-1 animate-pulse" />}
+        {!isTypingComplete && <span className="inline-block w-1.5 h-4 bg-[#B89758] ml-1 animate-pulse" />}
       </p>
 
       <AnimatePresence>
         {showExtras && (
           <motion.div
-            initial={{ opacity: 0, y: 14 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.45, ease: 'easeOut' }}
-            className="space-y-4"
+            transition={{ duration: 0.4, ease: 'easeOut' }}
+            className="space-y-3"
           >
             <CompactMetricsRow visualData={visualData} currentWeather={currentWeather} currentAQI={currentAQI} />
             <SmartSuggestions suggestions={suggestions} onSelect={onSuggest} />
@@ -249,27 +240,9 @@ const StreamingMessageBubble = ({ text, visualData, suggestions, onComplete, onS
    ══════════════════════════════════════════════════════════ */
 const StaticMessageBubble = ({ text, visualData, suggestions, onSuggest, currentWeather, currentAQI }) => (
   <div className="space-y-3 w-full text-left">
-    <p className="text-slate-100 leading-relaxed font-semibold text-[15px] whitespace-pre-line">{text}</p>
+    <p className="text-[#2C2621] leading-relaxed font-medium text-[15px] whitespace-pre-line">{text}</p>
     <CompactMetricsRow visualData={visualData} currentWeather={currentWeather} currentAQI={currentAQI} />
     <SmartSuggestions suggestions={suggestions} onSelect={onSuggest} />
-  </div>
-);
-
-/* ══════════════════════════════════════════════════════════
-   AI CORE ORB
-   ══════════════════════════════════════════════════════════ */
-const AICoreOrb = ({ isTyping, weatherTheme }) => (
-  <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 overflow-hidden mix-blend-screen">
-    <motion.div
-      animate={{ scale: isTyping ? [1, 1.15, 1] : [1, 1.05, 1], rotate: 360 }}
-      transition={{ duration: isTyping ? 3 : 20, repeat: Infinity, ease: 'linear' }}
-      className={`w-[500px] h-[500px] relative opacity-30 transition-all duration-1000 ${weatherTheme.orbGlow}`}
-    >
-      <div className="absolute inset-0 rounded-full blur-[100px] bg-current" />
-      <div className="absolute inset-10 border-2 border-white/10 rounded-full border-dashed" style={{ animation: 'spin 30s linear infinite' }} />
-      <div className="absolute inset-24 border border-white/20 rounded-full" />
-      <div className="absolute inset-32 border border-white/5 rounded-full border-dashed" style={{ animation: 'spin 20s linear infinite reverse' }} />
-    </motion.div>
   </div>
 );
 
@@ -358,12 +331,12 @@ Lekin live weather data active hai. ${weather?.name || 'Your area'} me abhi ${we
   };
 
   const getWeatherTheme = () => {
-    if (!weather) return { bg: 'from-slate-900 via-indigo-950 to-slate-900', orbGlow: 'text-cyan-500', textGlow: 'text-glow-cyan' };
+    if (!weather) return { bg: 'from-[#FAF8F5] via-[#F5EFEB] to-[#FAF8F5]', orbGlow: 'text-[#C5A880]', textGlow: 'text-[#8C6D3B]' };
     const main = weather.weather[0].main.toLowerCase();
-    if (main.includes('rain') || main.includes('drizzle')) return { bg: 'from-slate-900 via-blue-900/40 to-slate-900', orbGlow: 'text-blue-500', textGlow: 'text-glow-cyan' };
-    if (main.includes('clear')) return { bg: 'from-slate-900 via-orange-900/30 to-slate-900', orbGlow: 'text-orange-500', textGlow: 'text-glow-cyan' };
-    if (main.includes('thunderstorm')) return { bg: 'from-slate-950 via-purple-900/40 to-slate-950', orbGlow: 'text-purple-500', textGlow: 'text-glow-cyan' };
-    return { bg: 'from-slate-900 via-indigo-950/40 to-slate-900', orbGlow: 'text-cyan-500', textGlow: 'text-glow-cyan' };
+    if (main.includes('rain') || main.includes('drizzle')) return { bg: 'from-[#FAF8F5] via-[#E8EDF2] to-[#FAF8F5]', orbGlow: 'text-[#5B7B88]', textGlow: 'text-[#5B7B88]' };
+    if (main.includes('clear')) return { bg: 'from-[#FAF8F5] via-[#FDF8EC] to-[#FAF8F5]', orbGlow: 'text-[#C5A880]', textGlow: 'text-[#8C6D3B]' };
+    if (main.includes('thunderstorm')) return { bg: 'from-[#FAF8F5] via-[#F0EBF5] to-[#FAF8F5]', orbGlow: 'text-[#7D4D73]', textGlow: 'text-[#7D4D73]' };
+    return { bg: 'from-[#FAF8F5] via-[#F5EFEB] to-[#FAF8F5]', orbGlow: 'text-[#C5A880]', textGlow: 'text-[#8C6D3B]' };
   };
 
   const theme = getWeatherTheme();
@@ -380,44 +353,42 @@ Lekin live weather data active hai. ${weather?.name || 'Your area'} me abhi ${we
   const visibleBottomChips = bottomChips ?? defaultChips;
 
   return (
-    <div className={`relative min-h-screen w-full transition-colors duration-1000 bg-gradient-to-br ${theme.bg} overflow-x-hidden`}>
+    <div className="relative min-h-screen w-full overflow-x-hidden pt-6 pb-16">
       <style dangerouslySetInnerHTML={{
         __html: `
         .custom-chat-scrollbar::-webkit-scrollbar { width: 5px; }
-        .custom-chat-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); border-radius: 999px; }
-        .custom-chat-scrollbar::-webkit-scrollbar-thumb { background: rgba(34,211,238,0.2); border-radius: 999px; }
-        .custom-chat-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(34,211,238,0.5); }
+        .custom-chat-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.02); border-radius: 999px; }
+        .custom-chat-scrollbar::-webkit-scrollbar-thumb { background: rgba(197, 168, 128, 0.35); border-radius: 999px; }
+        .custom-chat-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(184, 151, 88, 0.6); }
       ` }} />
 
-      <AICoreOrb isTyping={isTyping} weatherTheme={theme} />
-      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10 pointer-events-none mix-blend-overlay" />
+      <div className="relative max-w-5xl w-[92%] mx-auto z-10 flex flex-col items-center">
 
-      <div className="relative max-w-[1400px] w-[92%] mx-auto pt-32 pb-16 z-10">
-
-        {/* Header */}
-        <div className="text-center w-full mb-8 relative z-20">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-extrabold uppercase tracking-widest text-cyan-400 mb-4 backdrop-blur-md shadow-lg shadow-black/20 animate-pulse">
-            <Bot className="w-3 h-3" />
-            AtmosIQ Intelligent Assistant
+        {/* 3D Luxury Orbital AI Core Header */}
+        <div className="text-center w-full mb-6 flex flex-col items-center">
+          <div className="w-52 h-52 relative flex items-center justify-center -mb-6">
+            <LuxuryAICore3D isTyping={isTyping} isListening={isListening} className="w-full h-full" />
           </div>
-          <h1 className="text-4xl md:text-5xl font-black flex items-center justify-center gap-4 mb-3 tracking-tight">
-            <CloudSun className={`w-10 h-10 md:w-12 md:h-12 ${theme.textGlow}`} />
-            <span className={`bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-slate-400 drop-shadow-2xl ${theme.textGlow}`}>
-              AtmosIQ AI
-            </span>
+
+          <div className="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-white/85 border border-[#C5A880]/30 text-[10px] font-roman tracking-[0.25em] uppercase text-[#8C6D3F] mb-2 backdrop-blur-md shadow-sm">
+            <Sparkles className="w-3 h-3 text-[#B89758]" />
+            AtmosIQ Conversational Core · 3D Orbital
+          </div>
+
+          <h1 className="text-3xl md:text-4xl font-editorial font-bold text-[#1C1917] tracking-tight">
+            Spatial Intelligence Atelier
           </h1>
-          <p className="text-white/60 font-medium tracking-wide flex items-center justify-center gap-2 text-xs md:text-sm">
-            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse inline-block" />
-            Pure Conversational Climate Intelligence
+          <p className="text-xs text-[#786E65] font-medium tracking-wide mt-1">
+            Multilingual Atmospheric Dialogue · English, Hinglish & Hindi
           </p>
         </div>
 
-        {/* Chat Console */}
-        <div className="w-full h-[700px] max-h-[700px] min-h-[700px] flex flex-col overflow-hidden relative glass-dark rounded-[2.5rem] border border-white/10 shadow-[0_30px_70px_rgba(0,0,0,0.7)] backdrop-blur-3xl z-10">
+        {/* Tactile Chat Console */}
+        <div className="w-full h-[620px] max-h-[620px] flex flex-col overflow-hidden relative luxury-panel rounded-[2.5rem] border border-[#C5A880]/35 shadow-xl backdrop-blur-2xl z-10">
 
-          {/* Messages viewport */}
+          {/* Messages Viewport */}
           <div
-            className="flex-1 overflow-y-auto custom-chat-scrollbar p-6 md:p-8 space-y-6 scroll-smooth relative"
+            className="flex-1 overflow-y-auto custom-chat-scrollbar p-6 md:p-8 space-y-5 scroll-smooth relative"
             style={{ overscrollBehavior: 'contain' }}
           >
             <AnimatePresence initial={false}>
@@ -428,30 +399,27 @@ Lekin live weather data active hai. ${weather?.name || 'Your area'} me abhi ${we
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.25, ease: 'easeOut' }}
-                  className={`flex gap-4 ${msg.type === 'user' ? 'flex-row-reverse' : 'flex-row'} relative z-10`}
+                  className={`flex gap-3.5 ${msg.type === 'user' ? 'flex-row-reverse' : 'flex-row'} relative z-10`}
                 >
                   {/* Avatar */}
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-lg border ${msg.type === 'user'
-                    ? 'bg-gradient-to-br from-indigo-500 to-purple-600 border-purple-400/30'
-                    : 'bg-gradient-to-br from-cyan-500 to-blue-600 border-cyan-400/30 shadow-[0_0_15px_rgba(34,211,238,0.2)]'
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 shadow-sm border ${msg.type === 'user'
+                    ? 'bg-[#EAE2D3] border-[#C5A880]/40 text-[#443E38]'
+                    : 'bg-[#FAF5ED] border-[#C5A880]/50 text-[#8C6D3F]'
                     }`}>
                     {msg.type === 'user' ? (
-                      <User className="w-5 h-5 text-white" />
+                      <User className="w-4 h-4" />
                     ) : (
-                      <Bot className="w-5 h-5 text-white animate-pulse" />
+                      <Bot className="w-4 h-4" />
                     )}
                   </div>
 
-                  {/* Message bubble */}
-                  <div className={`max-w-[85%] md:max-w-[78%] rounded-2xl px-5 py-4 shadow-2xl backdrop-blur-md relative group ${msg.type === 'user'
-                    ? 'bg-indigo-950/85 rounded-tr-none border border-indigo-400/40 text-left'
-                    : 'bg-slate-950/85 rounded-tl-none border border-cyan-500/35 text-left'
+                  {/* Message Bubble */}
+                  <div className={`max-w-[85%] md:max-w-[78%] rounded-2xl px-5 py-4 shadow-sm relative text-left ${msg.type === 'user'
+                    ? 'bg-white rounded-tr-none border border-[#C5A880]/40 text-[#1C1917]'
+                    : 'bg-[#FAF8F5]/95 rounded-tl-none border border-[#C5A880]/25 text-[#2C2621]'
                     }`}>
-                    <div className={`absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10 blur-xl ${msg.type === 'user' ? 'bg-purple-500/10' : 'bg-cyan-500/10'
-                      }`} />
-
                     {msg.type === 'user' ? (
-                      <p className="text-slate-100 leading-relaxed font-semibold text-[15px] whitespace-pre-line">{msg.text}</p>
+                      <p className="text-[#1C1917] leading-relaxed font-medium text-[15px] whitespace-pre-line">{msg.text}</p>
                     ) : msg.isStreaming ? (
                       <StreamingMessageBubble
                         text={msg.text}
@@ -477,18 +445,18 @@ Lekin live weather data active hai. ${weather?.name || 'Your area'} me abhi ${we
               ))}
             </AnimatePresence>
 
-            {/* Thinking indicator */}
+            {/* Thinking Indicator */}
             {isTyping && (
-              <div className="flex gap-4 flex-row">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 border border-cyan-400/30 flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(34,211,238,0.3)]">
-                  <Bot className="w-5 h-5 text-white animate-pulse" />
+              <div className="flex gap-3.5 flex-row">
+                <div className="w-9 h-9 rounded-xl bg-[#FAF5ED] border border-[#C5A880]/40 flex items-center justify-center shrink-0 shadow-sm text-[#8C6D3F]">
+                  <Bot className="w-4 h-4 animate-pulse" />
                 </div>
-                <div className="bg-slate-950/85 rounded-2xl rounded-tl-none px-5 py-3.5 border border-cyan-500/30 flex items-center gap-3 backdrop-blur-md">
-                  <span className="text-cyan-400 text-xs font-extrabold uppercase tracking-widest animate-pulse">Thinking...</span>
+                <div className="bg-[#FAF8F5] rounded-2xl rounded-tl-none px-4 py-3 border border-[#C5A880]/30 flex items-center gap-2.5 shadow-sm">
+                  <span className="text-[#8C6D3F] text-[10px] font-roman tracking-wider uppercase">Synthesizing...</span>
                   <div className="flex gap-1">
-                    <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                    <span className="w-1.5 h-1.5 bg-[#B89758] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <span className="w-1.5 h-1.5 bg-[#B89758] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <span className="w-1.5 h-1.5 bg-[#B89758] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                   </div>
                 </div>
               </div>
@@ -504,17 +472,17 @@ Lekin live weather data active hai. ${weather?.name || 'Your area'} me abhi ${we
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3 }}
-                className="px-6 py-3.5 flex items-center gap-2 overflow-x-auto no-scrollbar border-t border-white/10 bg-slate-950/60 backdrop-blur-xl shrink-0"
+                className="px-6 py-2.5 flex items-center gap-2 overflow-x-auto no-scrollbar border-t border-[#C5A880]/20 bg-[#FAF8F5]/80 backdrop-blur-md shrink-0"
               >
-                <Sparkles className="w-3.5 h-3.5 text-cyan-400/60 shrink-0" />
+                <Sparkles className="w-3.5 h-3.5 text-[#B89758] shrink-0" />
                 {visibleBottomChips.map((chip, idx) => (
                   <button
                     key={idx}
                     type="button"
                     onClick={() => handleSend(null, chip.query)}
-                    className="whitespace-nowrap text-[12px] font-bold bg-slate-900/80 border border-white/15 hover:border-cyan-400/60 rounded-2xl px-3.5 py-2 transition-all duration-300 flex items-center gap-1.5 text-slate-300 hover:text-white hover:bg-cyan-950/40 hover:shadow-[0_0_12px_rgba(34,211,238,0.2)] hover:-translate-y-0.5 cursor-pointer"
+                    className="whitespace-nowrap text-xs font-medium bg-white/80 border border-[#C5A880]/30 hover:border-[#B89758] rounded-full px-3 py-1 transition-all flex items-center gap-1.5 text-[#57493A] hover:text-[#1C1917] hover:bg-white shadow-xs cursor-pointer"
                   >
-                    <span className="text-sm leading-none">{chip.emoji}</span>
+                    <span className="text-xs leading-none">{chip.emoji}</span>
                     {chip.label}
                   </button>
                 ))}
@@ -523,50 +491,36 @@ Lekin live weather data active hai. ${weather?.name || 'Your area'} me abhi ${we
           </AnimatePresence>
 
           {/* Input Bar */}
-          <div className="p-5 md:p-6 bg-slate-950/70 border-t border-white/10 backdrop-blur-2xl shrink-0">
+          <div className="p-4 md:p-5 bg-white/85 border-t border-[#C5A880]/25 backdrop-blur-xl shrink-0">
             <form onSubmit={(e) => handleSend(e)} className="relative flex items-center gap-3">
               <button
                 type="button"
                 onClick={toggleListen}
-                className={`p-3.5 rounded-xl transition-all duration-300 flex items-center justify-center relative overflow-hidden group shrink-0 cursor-pointer ${isListening
-                  ? 'bg-red-500/20 border border-red-500 shadow-[0_0_20px_rgba(239,68,68,0.4)] text-red-400'
-                  : 'bg-white/5 border border-white/10 hover:bg-white/10 text-slate-300'
+                className={`p-3 rounded-xl transition-all duration-300 flex items-center justify-center relative shrink-0 cursor-pointer ${isListening
+                  ? 'bg-[#FAF0E6] border border-[#B35446] text-[#B35446] shadow-sm'
+                  : 'bg-[#FAF8F5] border border-[#C5A880]/30 hover:border-[#B89758] text-[#57493A]'
                   }`}
               >
-                {isListening && (
-                  <div className="absolute inset-0 flex items-center justify-center gap-0.5 opacity-50">
-                    {[1, 2, 3].map(i => (
-                      <motion.div
-                        key={i}
-                        animate={{ height: ['20%', '80%', '20%'] }}
-                        transition={{ duration: 0.5, repeat: Infinity, delay: i * 0.1 }}
-                        className="w-0.5 bg-red-400 rounded-full"
-                      />
-                    ))}
-                  </div>
-                )}
-                {isListening ? <MicOff className="w-5 h-5 relative z-10" /> : <Mic className="w-5 h-5 group-hover:scale-110 transition-transform relative z-10" />}
+                {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
               </button>
 
-              <div className="flex-1 relative group">
-                <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/30 to-purple-500/30 rounded-xl blur-md opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
+              <div className="flex-1 relative">
                 <input
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Ask about weather, AQI, forecasts..."
-                  className="w-full bg-slate-900 border border-white/25 rounded-xl py-3.5 pl-5 pr-12 text-sm text-white font-semibold focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all placeholder-slate-400 shadow-inner relative z-10"
+                  placeholder="Inquire about atmospheric forecasts, AQI, voyage feasibility..."
+                  className="w-full bg-[#FAF8F5] border border-[#C5A880]/30 rounded-xl py-3 pl-4 pr-10 text-xs md:text-sm text-[#1C1917] font-medium focus:outline-none focus:border-[#B89758] focus:ring-1 focus:ring-[#B89758]/30 transition-all placeholder-[#A89D8F] shadow-inner"
                 />
-                <Zap className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600 group-focus-within:text-cyan-500 transition-colors z-20" />
+                <Zap className="absolute right-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#A89D8F]" />
               </div>
 
               <button
                 type="submit"
                 disabled={!input.trim() || isTyping}
-                className="p-3.5 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl text-white disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-[0_0_20px_rgba(34,211,238,0.5)] transition-all duration-300 hover:scale-105 active:scale-95 group relative overflow-hidden shrink-0 cursor-pointer"
+                className="luxury-gold-btn p-3 rounded-xl disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300 shadow-sm shrink-0 cursor-pointer"
               >
-                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
-                <Send className="w-5 h-5 relative z-10" />
+                <Send className="w-4 h-4" />
               </button>
             </form>
           </div>

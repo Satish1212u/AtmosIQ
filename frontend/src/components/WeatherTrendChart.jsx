@@ -34,18 +34,16 @@ const WeatherTrendChart = ({ hourlyData }) => {
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="glass rounded-3xl p-6 border border-white/10 bg-slate-900/60 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative overflow-hidden"
+      className="luxury-panel p-6 rounded-3xl border border-[#C5A880]/30 bg-[#FAF8F5]/90 shadow-[0_20px_50px_rgba(28,25,23,0.06)] relative overflow-hidden"
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-transparent to-transparent opacity-40 pointer-events-none" />
-
       {/* Header */}
-      <div className="flex items-center justify-between mb-6 border-b border-white/10 pb-3">
-        <div className="flex items-center gap-2">
-          <Thermometer className="w-5 h-5 text-amber-400" />
-          <h3 className="text-sm font-black text-white uppercase tracking-widest font-mono">Thermal Trajectory</h3>
+      <div className="flex items-center justify-between mb-6 border-b border-[#C5A880]/20 pb-3">
+        <div className="flex items-center gap-2.5">
+          <Thermometer className="w-4 h-4 text-[#8C6D3B]" />
+          <h3 className="text-xs font-roman uppercase tracking-[0.2em] text-[#1C1917] font-semibold">24-Hour Thermal Trajectory</h3>
         </div>
-        <span className="text-[10px] font-black text-cyan-400 uppercase tracking-widest bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">
-          24H Timeline
+        <span className="text-[10px] font-roman uppercase tracking-widest text-[#8C6D3B] bg-[#F5EFEB] px-2.5 py-1 rounded-full border border-[#C5A880]/30 font-medium">
+          Diurnal Curve
         </span>
       </div>
 
@@ -55,15 +53,15 @@ const WeatherTrendChart = ({ hourlyData }) => {
           <svg className="w-full h-auto overflow-visible" viewBox={`0 0 ${width} ${height}`}>
             <defs>
               <linearGradient id="glowTempGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#22d3ee" stopOpacity="0.4" />
-                <stop offset="100%" stopColor="#22d3ee" stopOpacity="0.0" />
+                <stop offset="0%" stopColor="#C5A880" stopOpacity="0.25" />
+                <stop offset="100%" stopColor="#C5A880" stopOpacity="0.0" />
               </linearGradient>
             </defs>
 
             {/* Grid Lines */}
-            <line x1={padding} y1={padding} x2={width - padding} y2={padding} stroke="rgba(255,255,255,0.04)" strokeDasharray="3 3" />
-            <line x1={padding} y1={height / 2} x2={width - padding} y2={height / 2} stroke="rgba(255,255,255,0.04)" strokeDasharray="3 3" />
-            <line x1={padding} y1={height - padding} x2={width - padding} y2={height - padding} stroke="rgba(255,255,255,0.08)" />
+            <line x1={padding} y1={padding} x2={width - padding} y2={padding} stroke="rgba(197,168,128,0.15)" strokeDasharray="3 3" />
+            <line x1={padding} y1={height / 2} x2={width - padding} y2={height / 2} stroke="rgba(197,168,128,0.15)" strokeDasharray="3 3" />
+            <line x1={padding} y1={height - padding} x2={width - padding} y2={height - padding} stroke="rgba(197,168,128,0.25)" />
 
             {/* Gradient Filled Area */}
             <motion.path
@@ -78,41 +76,40 @@ const WeatherTrendChart = ({ hourlyData }) => {
             <motion.path
               d={pathData}
               fill="none"
-              stroke="#22d3ee"
-              strokeWidth="3.5"
+              stroke="#B89758"
+              strokeWidth="2.5"
               strokeLinecap="round"
               initial={{ pathLength: 0 }}
               animate={{ pathLength: 1 }}
               transition={{ duration: 1.2, ease: 'easeInOut' }}
-              className="drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]"
             />
 
             {/* Coordinate Points and Value Bubbles */}
             {points.map((p, idx) => (
               <g key={idx} className="group/dot cursor-pointer">
-                {/* Glow Dot */}
+                {/* Gold Dot */}
                 <circle
                   cx={p.x}
                   cy={p.y}
-                  r="5"
-                  className="fill-cyan-400 stroke-slate-950 stroke-2 drop-shadow-[0_0_6px_#22d3ee]"
+                  r="4"
+                  className="fill-[#FAF8F5] stroke-[#B89758] stroke-2"
                 />
                 {/* Outer interactive halo */}
                 <circle
                   cx={p.x}
                   cy={p.y}
                   r="12"
-                  fill="rgba(34,211,238,0.15)"
+                  fill="rgba(197,168,128,0.2)"
                   className="opacity-0 hover:opacity-100 transition-opacity duration-300"
                 />
                 
                 {/* Peak temperature reading above points */}
                 <text
                   x={p.x}
-                  y={p.y - 12}
+                  y={p.y - 10}
                   textAnchor="middle"
-                  fill="#ffffff"
-                  className="text-[10px] font-black font-mono select-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
+                  fill="#1C1917"
+                  className="text-[11px] font-serif font-medium select-none"
                 >
                   {Math.round(p.temp)}°
                 </text>
@@ -122,8 +119,8 @@ const WeatherTrendChart = ({ hourlyData }) => {
                   x={p.x}
                   y={height - 2}
                   textAnchor="middle"
-                  fill="rgba(255,255,255,0.5)"
-                  className="text-[8px] font-bold font-mono uppercase tracking-wider select-none"
+                  fill="#786C62"
+                  className="text-[9px] font-sans uppercase tracking-wider select-none font-medium"
                 >
                   {p.time}
                 </text>

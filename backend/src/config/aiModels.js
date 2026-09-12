@@ -1,8 +1,13 @@
 export const AI_PROVIDERS = {
   GEMINI: 'gemini',
+  OPENROUTER: 'openrouter',
   LOCAL: 'local'
 };
 
+/**
+ * Gemini model cascade — tried in priority order.
+ * Timeouts are strict per-provider; no global retry logic here.
+ */
 export const MODEL_CONFIGS = [
   {
     id: 'gemini-2.5-flash',
@@ -35,8 +40,23 @@ export const MODEL_CONFIGS = [
   }
 ];
 
+/**
+ * OpenRouter secondary fallback configuration.
+ * Triggered ONLY after ALL Gemini models fail with retriable errors.
+ * Model name is read from process.env.OPENROUTER_MODEL at runtime.
+ * API key is NEVER exposed to the frontend or printed in logs.
+ */
+export const OPENROUTER_CONFIG = {
+  id: 'openrouter-fallback',
+  provider: AI_PROVIDERS.OPENROUTER,
+  endpoint: 'https://openrouter.ai/api/v1/chat/completions',
+  timeout: 12000,
+  priority: 4,
+  // Model name resolved at call-time from env; falls back to a known free model
+  getModel: () => process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.1-8b-instruct:free'
+};
+
 export const GLOBAL_AI_SETTINGS = {
-  MAX_RETRIES: 1,
   ENABLE_FALLBACK: true,
   DEFAULT_PROVIDER: AI_PROVIDERS.GEMINI
 };

@@ -23,8 +23,8 @@ const WeatherImageBanner = ({ condition = 'clear', topic = 'general' }) => {
         title: "Precipitation Forecast",
         subtitle: "Live rain and precipitation data",
         image: "https://images.unsplash.com/photo-1438029071396-1e831a7fa6d8?auto=format&fit=crop&w=800&q=80",
-        overlayClass: "bg-gradient-to-t from-blue-500/30 via-cyan-500/15 to-transparent",
-        icon: <CloudRain className="w-5 h-5 text-cyan-400 animate-bounce" />,
+        overlayClass: "bg-gradient-to-t from-[#5B7B88]/30 via-[#C5A880]/15 to-transparent",
+        icon: <CloudRain className="w-5 h-5 text-[#5B7B88]" />,
         alertText: "RAIN FORECAST ACTIVE"
       };
     }
@@ -58,71 +58,39 @@ const WeatherImageBanner = ({ condition = 'clear', topic = 'general' }) => {
       initial={{ opacity: 0, scale: 0.98 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.5 }}
-      className="w-full h-44 rounded-3xl overflow-hidden border border-white/10 relative group shadow-[0_20px_40px_rgba(0,0,0,0.6)]"
+      className="w-full h-44 rounded-3xl overflow-hidden border border-[#C5A880]/30 relative group shadow-[0_20px_40px_rgba(28,25,23,0.1)]"
     >
       {/* Background Image */}
       <img
         src={details.image}
         alt={details.title}
-        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 ease-out"
+        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 ease-out brightness-90"
       />
 
       {/* Color Overlay */}
       <div className={`absolute inset-0 transition-colors duration-1000 ${details.overlayClass}`} />
 
-      {/* Ambient particles (rain stream effect) */}
-      {(condition.toLowerCase().includes('rain') || topic.toLowerCase() === 'rain') && (
-        <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-40">
-          {[...Array(6)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute w-[1px] h-12 bg-gradient-to-b from-transparent to-cyan-300 rounded"
-              style={{
-                left: `${15 + i * 16}%`,
-                top: `${-20 + (i * 12)}%`,
-                animation: `rainDropFall 1.2s linear infinite`,
-                animationDelay: `${i * 200}ms`
-              }}
-            />
-          ))}
-          <style dangerouslySetInnerHTML={{__html: `
-            @keyframes rainDropFall {
-              0% { transform: translateY(-50px); opacity: 0; }
-              50% { opacity: 1; }
-              100% { transform: translateY(220px); opacity: 0; }
-            }
-          `}} />
-        </div>
-      )}
-
-      {/* AQI haze effect */}
-      {topic.toLowerCase() === 'aqi' && (
-        <div className="absolute inset-0 pointer-events-none overflow-hidden mix-blend-color-dodge opacity-25">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-amber-500/20 via-transparent to-transparent blur-3xl animate-pulse" />
-        </div>
-      )}
-
       {/* Header Info Tag */}
       <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-10 pointer-events-none">
-        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-slate-950/80 border border-white/10 backdrop-blur-md">
+        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-[#FAF8F5]/90 border border-[#C5A880]/30 backdrop-blur-md shadow-sm">
           {details.icon}
-          <span className="text-[10px] font-black font-mono text-white uppercase tracking-widest">
+          <span className="text-[9px] font-roman font-semibold text-[#1C1917] uppercase tracking-[0.15em]">
             {details.alertText}
           </span>
         </div>
         
-        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-950/80 border border-cyan-500/30 text-[9px] font-extrabold uppercase tracking-widest text-cyan-400 backdrop-blur-md">
+        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FAF8F5]/90 border border-[#C5A880]/30 text-[9px] font-roman uppercase tracking-widest text-[#8C6D3B] backdrop-blur-md shadow-sm font-semibold">
           <Eye className="w-3.5 h-3.5" />
-          Live View
+          Telemetry Live
         </div>
       </div>
 
       {/* Bottom Title Text Overlay */}
-      <div className="absolute bottom-4 left-4 right-4 z-10 pointer-events-none text-left">
-        <h3 className="text-base font-black text-white uppercase tracking-wider font-mono drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+      <div className="absolute bottom-4 left-4 right-4 z-10 pointer-events-none text-left bg-gradient-to-t from-[#1C1917]/80 via-[#1C1917]/40 to-transparent p-4 rounded-2xl">
+        <h3 className="text-base font-serif font-medium text-[#FAF8F5] tracking-wide">
           {details.title}
         </h3>
-        <p className="text-[11px] text-slate-300 font-bold tracking-wide drop-shadow-[0_1px_3px_rgba(0,0,0,0.85)] mt-0.5">
+        <p className="text-[11px] text-[#EDE6DA] font-sans tracking-wide mt-0.5">
           {details.subtitle}
         </p>
       </div>

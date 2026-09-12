@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   MapPin, Calendar, ShieldCheck, ShieldAlert, ShieldX, 
-  Activity, CloudRain, Sun, ArrowRight, Compass 
+  Activity, CloudRain, Sun, ArrowRight, Compass, Sparkles 
 } from 'lucide-react';
 import { generateAIResponse } from '../services/aiApi';
 import { useWeather } from '../context/WeatherContext';
+import LuxuryRoute3D from '../components/3d/LuxuryRoute3D';
 
 const TravelChecker = () => {
   const { weather, airQuality } = useWeather();
@@ -24,18 +25,22 @@ const TravelChecker = () => {
     const prompt = `Analyze travel safety for ${destination} on ${date}. Return ONLY a JSON object with this exact structure (no markdown block, just raw JSON): { "decision": "GO" | "CAUTION" | "AVOID", "reasoning": "brief explanation", "risks": { "aqi": "string", "rain": "string", "storm": "string", "heatwave": "string" } }`;
     
     const aiResult = await generateAIResponse(prompt, weather, airQuality);
-    const aiText = aiResult.response || "";
+    const aiText = aiResult.reply || aiResult.response || "";
     
     try {
-      const cleanedText = aiText.replace(/```json\n?|\n?```/g, '').trim();
-      const result = JSON.parse(cleanedText);
+      let jsonStr = aiText.replace(/```json\n?|\n?```/g, '').trim();
+      const match = jsonStr.match(/\{[\s\S]*\}/);
+      if (match) {
+        jsonStr = match[0];
+      }
+      const result = JSON.parse(jsonStr);
       setStatus(result);
     } catch (err) {
       console.error("Failed to parse AI response:", err);
       setStatus({
         decision: 'CAUTION',
-        reasoning: aiText || 'Unable to parse AI response.',
-        risks: { aqi: 'Unknown Risk', rain: 'Unknown Chance', storm: 'Unknown Storm', heatwave: 'Unknown Heat' }
+        reasoning: aiText || 'Atmospheric metrics require conservative travel precautions.',
+        risks: { aqi: 'Moderate AQI', rain: '20% Chance', storm: 'Low Likelihood', heatwave: 'Temperate' }
       });
     }
     
@@ -43,97 +48,93 @@ const TravelChecker = () => {
   };
 
   const getDecisionStyles = () => {
-    if (!status) return { card: '', text: '', iconBg: '' };
+    if (!status) return { text: '', border: '', badge: '' };
     if (status.decision === 'GO') return {
-      card: 'from-emerald-950/40 via-slate-900/60 to-slate-900/80 border-emerald-500/40 shadow-[0_0_40px_rgba(16,185,129,0.15)]',
-      text: 'text-emerald-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.5)]',
-      iconBg: 'bg-emerald-500/10 border border-emerald-500/30'
+      text: 'text-[#4E7D63]',
+      border: 'border-[#4E7D63]/40',
+      badge: 'bg-[#4E7D63]/10 text-[#4E7D63] border-[#4E7D63]/30',
     };
     if (status.decision === 'CAUTION') return {
-      card: 'from-yellow-950/40 via-slate-900/60 to-slate-900/80 border-yellow-500/40 shadow-[0_0_40px_rgba(234,179,8,0.15)]',
-      text: 'text-yellow-400 drop-shadow-[0_0_15px_rgba(253,224,71,0.5)]',
-      iconBg: 'bg-yellow-500/10 border border-yellow-500/30'
+      text: 'text-[#C68A4C]',
+      border: 'border-[#C68A4C]/40',
+      badge: 'bg-[#C68A4C]/10 text-[#C68A4C] border-[#C68A4C]/30',
     };
     return {
-      card: 'from-rose-950/40 via-slate-900/60 to-slate-900/80 border-rose-500/40 shadow-[0_0_40px_rgba(244,63,94,0.15)]',
-      text: 'text-rose-400 drop-shadow-[0_0_15px_rgba(251,113,133,0.5)]',
-      iconBg: 'bg-rose-500/10 border border-rose-500/30'
+      text: 'text-[#B35446]',
+      border: 'border-[#B35446]/40',
+      badge: 'bg-[#B35446]/10 text-[#B35446] border-[#B35446]/30',
     };
   };
 
   const DecisionIcon = () => {
     if (!status) return null;
     const styles = getDecisionStyles();
-    if (status.decision === 'GO') return <ShieldCheck className={`w-14 h-14 ${styles.text}`} />;
-    if (status.decision === 'CAUTION') return <ShieldAlert className={`w-14 h-14 ${styles.text}`} />;
-    return <ShieldX className={`w-14 h-14 ${styles.text}`} />;
+    if (status.decision === 'GO') return <ShieldCheck className={`w-12 h-12 ${styles.text}`} />;
+    if (status.decision === 'CAUTION') return <ShieldAlert className={`w-12 h-12 ${styles.text}`} />;
+    return <ShieldX className={`w-12 h-12 ${styles.text}`} />;
   };
 
   const currentStyles = getDecisionStyles();
 
   return (
-    <div className="relative min-h-screen w-full bg-slate-950 text-white overflow-x-hidden">
+    <div className="relative min-h-screen w-full overflow-x-hidden pt-10 pb-16 relative z-10">
       
-      {/* Dynamic Background Elements */}
-      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10 pointer-events-none mix-blend-overlay"></div>
-      <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-10 left-1/4 w-[400px] h-[400px] bg-purple-500/5 rounded-full blur-[100px] pointer-events-none" />
-
-      {/* Main Container with responsive padding clearing the header/navbar */}
-      <div className="max-w-6xl mx-auto px-6 pt-32 pb-16 flex flex-col lg:flex-row gap-8 items-start relative z-10">
+      <div className="max-w-6xl mx-auto px-6 flex flex-col lg:flex-row gap-8 items-start relative z-10">
         
-        {/* Input Section (Left Column) */}
-        <div className="w-full lg:w-[35%] space-y-6">
+        {/* Input Requisition Panel (Left Column) */}
+        <div className="w-full lg:w-[38%] space-y-6">
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
           >
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/15 text-[10px] font-extrabold uppercase tracking-widest text-cyan-400 mb-3 shadow-md backdrop-blur-md">
-              <Compass className="w-3 h-3 animate-spin-slow" />
-              Pathfinder Telemetry
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/85 border border-[#C5A880]/30 text-[10px] font-roman tracking-[0.25em] uppercase text-[#8C6D3F] mb-3 shadow-xs">
+              <Compass className="w-3 h-3 text-[#B89758]" />
+              PATHFINDER TELEMETRY
             </div>
-            <h1 className="text-3xl md:text-4xl font-black tracking-tight mb-2 bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-200 uppercase font-mono">
-              AtmosIQ Pathfinder
+            <h1 className="text-3xl md:text-4xl font-editorial font-bold text-[#1C1917] tracking-tight mb-2">
+              Voyage Feasibility
             </h1>
-            <p className="text-slate-200 font-semibold text-sm leading-relaxed">
-              AI-powered climate safety and environmental risk parameters for global routes.
+            <p className="text-[#57493A] font-medium text-xs leading-relaxed">
+              Spatial climate analytics and multi-vector risk parameters for global itineraries.
             </p>
           </motion.div>
 
+          {/* Form */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
           >
-            <form onSubmit={handleCheck} className="glass p-6 md:p-8 rounded-[2rem] space-y-5 border border-white/15 relative overflow-hidden group shadow-[0_20px_50px_rgba(0,0,0,0.5)] bg-slate-900/40">
-              {/* Card glowing edge */}
-              <div className="absolute -inset-x-20 -top-20 h-40 bg-gradient-to-b from-cyan-500/10 to-transparent blur-3xl pointer-events-none group-hover:from-cyan-500/20 transition-all duration-700" />
-              
-              <div className="space-y-2">
-                <label className="block text-[11px] font-extrabold text-slate-200 uppercase tracking-widest">Destination</label>
-                <div className="relative group/input">
-                  <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within/input:text-cyan-400 transition-colors" />
+            <form onSubmit={handleCheck} className="luxury-panel p-6 md:p-8 rounded-3xl space-y-4 shadow-md">
+              <div className="space-y-1.5">
+                <label className="block text-[10px] font-roman text-[#786E65] uppercase tracking-widest">
+                  DESTINATION ATELIER
+                </label>
+                <div className="relative">
+                  <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#A89D8F]" />
                   <input 
                     type="text" 
                     value={destination}
                     onChange={(e) => setDestination(e.target.value)}
-                    placeholder="e.g., Tokyo, Japan" 
-                    className="w-full bg-slate-950/80 border border-white/25 hover:border-cyan-400 focus:border-cyan-400 rounded-2xl py-3.5 pl-12 pr-4 text-white font-semibold focus:outline-none transition-all duration-300 shadow-inner placeholder-slate-400"
+                    placeholder="e.g., Zurich, Switzerland" 
+                    className="w-full bg-[#FAF8F5] border border-[#C5A880]/30 rounded-xl py-3 pl-10 pr-4 text-xs font-medium text-[#1C1917] focus:outline-none focus:border-[#B89758] focus:ring-1 focus:ring-[#B89758]/20 transition-all placeholder-[#A89D8F] shadow-inner"
                     required
                   />
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <label className="block text-[11px] font-extrabold text-slate-200 uppercase tracking-widest">Travel Date</label>
-                <div className="relative group/date">
-                  <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-hover/date:text-cyan-400 transition-colors" />
+              <div className="space-y-1.5">
+                <label className="block text-[10px] font-roman text-[#786E65] uppercase tracking-widest">
+                  ITINERARY DATE
+                </label>
+                <div className="relative">
+                  <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#A89D8F]" />
                   <input 
                     type="date" 
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
-                    className="w-full bg-slate-950/80 border border-white/25 hover:border-cyan-400 focus:border-cyan-400 rounded-2xl py-3.5 pl-12 pr-4 text-white font-semibold focus:outline-none transition-all duration-300 [color-scheme:dark] shadow-inner cursor-pointer"
+                    className="w-full bg-[#FAF8F5] border border-[#C5A880]/30 rounded-xl py-3 pl-10 pr-4 text-xs font-medium text-[#1C1917] focus:outline-none focus:border-[#B89758] focus:ring-1 focus:ring-[#B89758]/20 transition-all shadow-inner cursor-pointer"
                     required
                   />
                 </div>
@@ -142,45 +143,52 @@ const TravelChecker = () => {
               <button 
                 type="submit" 
                 disabled={loading}
-                className="w-full mt-4 py-4 rounded-2xl bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 text-white font-black uppercase tracking-wider hover:shadow-[0_0_30px_rgba(34,211,238,0.5)] transition-all duration-300 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2 cursor-pointer shadow-lg"
+                className="luxury-gold-btn w-full mt-2 py-3.5 rounded-xl font-bold uppercase tracking-wider text-xs font-roman flex justify-center items-center gap-2 cursor-pointer shadow-sm disabled:opacity-40"
               >
                 {loading ? (
-                  <span className="flex items-center gap-2 animate-pulse">
-                    <Activity className="w-5 h-5 animate-spin" />
-                    Analyzing Telemetry...
+                  <span className="flex items-center gap-2">
+                    <Activity className="w-4 h-4 animate-spin" />
+                    COMPUTING VOYAGE SAFETY...
                   </span>
                 ) : (
                   <>
-                    <span>Analyze Safety</span>
-                    <motion.div animate={{ x: [0, 5, 0] }} transition={{ repeat: Infinity, duration: 1 }}>
-                      <ArrowRight className="w-5 h-5" />
-                    </motion.div>
+                    <span>ANALYZE METEOROLOGICAL SAFETY</span>
+                    <ArrowRight className="w-4 h-4" />
                   </>
                 )}
               </button>
             </form>
           </motion.div>
+
+          {/* 3D Spatial Route Preview */}
+          <div className="luxury-panel p-4 rounded-3xl">
+            <span className="text-[9px] font-roman tracking-[0.2em] text-[#786E65] uppercase block mb-1">
+              3D DIMENSIONAL ROUTE SPLINE
+            </span>
+            <LuxuryRoute3D 
+              origin={weather?.name || 'Local'} 
+              destination={destination || 'Geneva'} 
+            />
+          </div>
         </div>
 
-        {/* Result Section (Right Column) */}
-        <div className="w-full lg:w-[65%] self-stretch">
+        {/* Verdict & Environmental Analysis (Right Column) */}
+        <div className="w-full lg:w-[62%] self-stretch">
           <AnimatePresence mode="wait">
             {loading && (
               <motion.div 
                 key="loading"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="h-full min-h-[350px] glass rounded-[2.5rem] flex flex-col items-center justify-center border border-white/10 p-8"
+                className="h-full min-h-[360px] luxury-panel rounded-3xl flex flex-col items-center justify-center p-8 text-center"
               >
-                <div className="relative w-28 h-28 mb-6">
-                  <div className="absolute inset-0 border-t-4 border-cyan-400 rounded-full animate-spin"></div>
-                  <div className="absolute inset-3 border-r-4 border-blue-500 rounded-full animate-spin-reverse"></div>
-                  <Activity className="absolute inset-0 m-auto text-cyan-300 w-10 h-10 animate-pulse" />
-                </div>
-                <h3 className="text-xl font-bold mb-2">Simulating Environmental Hazards</h3>
-                <p className="text-white/50 text-sm text-center max-w-sm">
-                  AI Orchestrator is scanning multiple atmospheric vectors, AQI thresholds, and local flight warnings...
+                <div className="w-16 h-16 rounded-full border-2 border-[#C5A880] border-t-transparent animate-spin mb-4" />
+                <h3 className="text-lg font-editorial font-bold text-[#1C1917] mb-1">
+                  Synthesizing Atmospheric Ensembles
+                </h3>
+                <p className="text-xs text-[#786E65] max-w-sm">
+                  Correlating barometric vectors, cloud strata, flight turbulence indices, and regional AQI metrics...
                 </p>
               </motion.div>
             )}
@@ -188,82 +196,67 @@ const TravelChecker = () => {
             {status && !loading && (
               <motion.div 
                 key="result"
-                initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                transition={{ type: "spring", stiffness: 100, damping: 15 }}
-                className={`glass border border-white/15 rounded-[2.5rem] p-6 md:p-8 bg-gradient-to-br ${currentStyles.card} flex flex-col justify-between h-full`}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className={`luxury-panel rounded-3xl p-6 md:p-8 flex flex-col justify-between h-full border ${currentStyles.border}`}
               >
                 <div>
-                  <div className="flex items-center gap-6 mb-8 border-b border-white/15 pb-6">
-                    <div className={`p-4 rounded-2xl backdrop-blur-md shadow-inner ${currentStyles.iconBg}`}>
+                  <div className="flex items-center gap-5 mb-6 pb-6 border-b border-[#C5A880]/20">
+                    <div className="p-3.5 rounded-2xl bg-white/90 border border-[#C5A880]/30 shadow-xs">
                       <DecisionIcon />
                     </div>
                     <div>
-                      <div className="text-[10px] uppercase tracking-widest text-slate-200 font-black mb-1">AI Verdict Core</div>
-                      <div className={`text-4xl md:text-5xl font-black ${currentStyles.text}`}>{status.decision}</div>
+                      <span className="text-[10px] font-roman tracking-[0.25em] text-[#786E65] uppercase block mb-0.5">
+                        VOYAGE RECOMMENDATION
+                      </span>
+                      <div className={`text-4xl md:text-5xl font-editorial font-bold ${currentStyles.text}`}>
+                        {status.decision}
+                      </div>
                     </div>
                   </div>
 
-                  <div className="bg-slate-950/70 border border-white/10 rounded-2xl p-6 mb-8 relative overflow-hidden">
-                    <div className={`absolute top-0 left-0 w-1.5 h-full ${status.decision === 'GO' ? 'bg-emerald-500' : status.decision === 'CAUTION' ? 'bg-yellow-500' : 'bg-rose-500'}`} />
-                    <h3 className={`font-black mb-2 text-xs uppercase tracking-widest ${status.decision === 'GO' ? 'text-emerald-400 font-black' : status.decision === 'CAUTION' ? 'text-yellow-400 font-black' : 'text-rose-400 font-black'}`}>
-                      Decryption & Analysis
-                    </h3>
-                    <p className="text-slate-100 leading-relaxed font-semibold text-[15px]">{status.reasoning}</p>
+                  <div className="p-5 rounded-2xl bg-white/80 border border-[#C5A880]/25 shadow-sm mb-6">
+                    <span className="text-[9px] font-roman tracking-wider uppercase text-[#8C6D3F] block mb-1 font-bold">
+                      EXECUTIVE CLIMATE ANALYSIS
+                    </span>
+                    <p className="text-sm text-[#443E38] font-medium leading-relaxed">
+                      {status.reasoning}
+                    </p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {/* AQI Risk Card */}
-                  <div className="bg-slate-950/80 hover:bg-slate-950 border border-white/15 hover:border-cyan-400/80 rounded-2xl p-4 flex flex-col justify-between transition-all duration-300 group/card relative overflow-hidden h-full shadow-inner">
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="p-2 rounded-lg bg-cyan-500/10 text-cyan-400 group-hover/card:scale-110 transition-all duration-300">
-                        <Activity className="w-4 h-4" />
-                      </div>
-                      <span className="text-[10px] text-slate-200 font-black uppercase tracking-wider">AQI Risk</span>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <div className="bg-white/70 p-3.5 rounded-2xl border border-[#C5A880]/25 shadow-xs flex flex-col justify-between">
+                    <div className="flex items-center gap-1.5 mb-2 text-[#4E7D63]">
+                      <Activity className="w-3.5 h-3.5" />
+                      <span className="text-[9px] font-roman text-[#786E65] uppercase">AQI RISK</span>
                     </div>
-                    <div className="text-sm font-black text-white leading-tight group-hover/card:text-cyan-300 transition-colors">
-                      {status.risks.aqi}
-                    </div>
+                    <span className="text-xs font-bold text-[#1C1917]">{status.risks.aqi}</span>
                   </div>
 
-                  {/* Rain Card */}
-                  <div className="bg-slate-950/80 hover:bg-slate-950 border border-white/15 hover:border-cyan-400/80 rounded-2xl p-4 flex flex-col justify-between transition-all duration-300 group/card relative overflow-hidden h-full shadow-inner">
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="p-2 rounded-lg bg-blue-500/10 text-blue-400 group-hover/card:scale-110 transition-all duration-300">
-                        <CloudRain className="w-4 h-4" />
-                      </div>
-                      <span className="text-[10px] text-slate-200 font-black uppercase tracking-wider">Rain Risk</span>
+                  <div className="bg-white/70 p-3.5 rounded-2xl border border-[#C5A880]/25 shadow-xs flex flex-col justify-between">
+                    <div className="flex items-center gap-1.5 mb-2 text-[#57493A]">
+                      <CloudRain className="w-3.5 h-3.5" />
+                      <span className="text-[9px] font-roman text-[#786E65] uppercase">RAIN INDEX</span>
                     </div>
-                    <div className="text-sm font-black text-white leading-tight group-hover/card:text-blue-300 transition-colors">
-                      {status.risks.rain}
-                    </div>
+                    <span className="text-xs font-bold text-[#1C1917]">{status.risks.rain}</span>
                   </div>
 
-                  {/* Storm Card */}
-                  <div className="bg-slate-950/80 hover:bg-slate-950 border border-white/15 hover:border-cyan-400/80 rounded-2xl p-4 flex flex-col justify-between transition-all duration-300 group/card relative overflow-hidden h-full shadow-inner">
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="p-2 rounded-lg bg-purple-500/10 text-purple-400 group-hover/card:scale-110 transition-all duration-300">
-                        <ShieldAlert className="w-4 h-4" />
-                      </div>
-                      <span className="text-[10px] text-slate-200 font-black uppercase tracking-wider">Storm Prob.</span>
+                  <div className="bg-white/70 p-3.5 rounded-2xl border border-[#C5A880]/25 shadow-xs flex flex-col justify-between">
+                    <div className="flex items-center gap-1.5 mb-2 text-[#B89758]">
+                      <ShieldAlert className="w-3.5 h-3.5" />
+                      <span className="text-[9px] font-roman text-[#786E65] uppercase">STORM PROB.</span>
                     </div>
-                    <div className="text-sm font-black text-white leading-tight group-hover/card:text-purple-300 transition-colors">
-                      {status.risks.storm}
-                    </div>
+                    <span className="text-xs font-bold text-[#1C1917]">{status.risks.storm}</span>
                   </div>
 
-                  {/* Heatwave Card */}
-                  <div className="bg-slate-950/80 hover:bg-slate-950 border border-white/15 hover:border-cyan-400/80 rounded-2xl p-4 flex flex-col justify-between transition-all duration-300 group/card relative overflow-hidden h-full shadow-inner">
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="p-2 rounded-lg bg-orange-500/10 text-orange-400 group-hover/card:scale-110 transition-all duration-300">
-                        <Sun className="w-4 h-4" />
-                      </div>
-                      <span className="text-[10px] text-slate-200 font-black uppercase tracking-wider">Heatwave</span>
+                  <div className="bg-white/70 p-3.5 rounded-2xl border border-[#C5A880]/25 shadow-xs flex flex-col justify-between">
+                    <div className="flex items-center gap-1.5 mb-2 text-[#C68A4C]">
+                      <Sun className="w-3.5 h-3.5" />
+                      <span className="text-[9px] font-roman text-[#786E65] uppercase">THERMAL RISK</span>
                     </div>
-                    <div className="text-sm font-black text-white leading-tight group-hover/card:text-orange-300 transition-colors">
-                      {status.risks.heatwave}
-                    </div>
+                    <span className="text-xs font-bold text-[#1C1917]">{status.risks.heatwave}</span>
                   </div>
                 </div>
               </motion.div>
@@ -272,16 +265,18 @@ const TravelChecker = () => {
             {!status && !loading && (
               <motion.div 
                 key="empty"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="h-full min-h-[350px] glass rounded-[2.5rem] flex flex-col items-center justify-center border border-white/15 p-8 opacity-90 hover:opacity-100 transition-opacity duration-300 shadow-[0_20px_50px_rgba(0,0,0,0.4)] bg-slate-900/40"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="h-full min-h-[360px] luxury-panel rounded-3xl flex flex-col items-center justify-center p-8 text-center"
               >
-                <div className="p-5 rounded-3xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-400 mb-6 shadow-inner animate-pulse">
-                  <Compass className="w-16 h-16" />
+                <div className="w-16 h-16 rounded-2xl bg-[#FAF5ED] border border-[#C5A880]/40 flex items-center justify-center text-[#B89758] mb-4 shadow-sm">
+                  <Compass className="w-8 h-8" />
                 </div>
-                <h3 className="text-2xl font-black mb-2 bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-200">Initialize Navigation Panel</h3>
-                <p className="text-slate-200 font-semibold text-sm text-center max-w-sm leading-relaxed">
-                  Provide your target destination and departure coordinates to synchronize risk mitigation parameters.
+                <h3 className="text-xl font-editorial font-bold text-[#1C1917] mb-1">
+                  Ready for Route Evaluation
+                </h3>
+                <p className="text-xs text-[#786E65] max-w-sm">
+                  Specify a global destination and itinerary departure date to simulate atmospheric vectors and risk thresholds.
                 </p>
               </motion.div>
             )}

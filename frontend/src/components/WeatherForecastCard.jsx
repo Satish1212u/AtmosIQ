@@ -17,9 +17,9 @@ const WeatherForecastCard = ({ forecastList }) => {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center gap-2 border-b border-white/10 pb-2">
-        <Calendar className="w-5 h-5 text-cyan-400" />
-        <h3 className="text-sm font-black text-white uppercase tracking-widest font-mono">5-Day Meteorological Trajectory</h3>
+      <div className="flex items-center gap-2.5 border-b border-[#C5A880]/20 pb-3">
+        <Calendar className="w-4 h-4 text-[#8C6D3B]" />
+        <h3 className="text-xs font-roman uppercase tracking-[0.2em] text-[#1C1917] font-semibold">5-Day Meteorological Trajectory</h3>
       </div>
 
       {/* Forecast list */}
@@ -31,33 +31,33 @@ const WeatherForecastCard = ({ forecastList }) => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: idx * 0.1, ease: 'easeOut' }}
             whileHover={{ scale: 1.03, y: -4 }}
-            className="glass rounded-2xl p-4 border border-white/10 bg-slate-950/60 backdrop-blur-2xl hover:border-cyan-400/40 hover:shadow-[0_15px_30px_rgba(34,211,238,0.15)] flex flex-col items-center justify-between text-center relative group overflow-hidden transition-all duration-300 shadow-lg"
+            className="luxury-panel p-4 rounded-2xl border border-[#C5A880]/25 bg-[#FAF8F5]/90 hover:border-[#C5A880]/60 hover:shadow-[0_15px_30px_rgba(197,168,128,0.15)] flex flex-col items-center justify-between text-center relative group overflow-hidden transition-all duration-300 shadow-sm"
           >
-            <div className="absolute inset-0 bg-gradient-to-t from-cyan-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#C5A880]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
             
             {/* Day Title */}
-            <span className="text-[11px] text-slate-300 font-extrabold uppercase tracking-widest mb-2 font-mono block">
+            <span className="text-[10px] text-[#786C62] font-roman uppercase tracking-[0.2em] mb-2 font-medium block">
               {item.day}
             </span>
 
             {/* Condition Icon */}
             <div className="my-3 relative">
-              <div className="absolute inset-0 bg-cyan-500/10 rounded-full blur-xl scale-125 opacity-0 group-hover:opacity-100 transition-all duration-500" />
+              <div className="absolute inset-0 bg-[#C5A880]/15 rounded-full blur-lg scale-125 opacity-0 group-hover:opacity-100 transition-all duration-500" />
               {getWeatherIcon(item.condition)}
             </div>
 
             {/* Temps */}
             <div className="flex flex-col gap-0.5 mt-2">
-              <span className="text-xl font-black text-white font-mono">
+              <span className="text-2xl font-serif font-light text-[#1C1917]">
                 {Math.round(item.tempMax)}°
               </span>
-              <span className="text-[10px] text-slate-400 font-extrabold font-mono">
+              <span className="text-[11px] text-[#786C62] font-sans font-medium">
                 {Math.round(item.tempMin)}° Min
               </span>
             </div>
 
             {/* Micro Weather Tag */}
-            <span className="text-[9px] text-cyan-400 font-extrabold uppercase tracking-wider mt-3 px-2 py-0.5 rounded bg-cyan-500/10 border border-cyan-500/20 w-full truncate block">
+            <span className="text-[9px] text-[#8C6D3B] font-medium uppercase tracking-wider mt-3 px-2 py-0.5 rounded-full bg-[#F5EFEB] border border-[#C5A880]/25 w-full truncate block">
               {item.condition}
             </span>
           </motion.div>
