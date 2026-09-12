@@ -34,7 +34,7 @@ const ChangeView = ({ center }) => {
 const RadarMap = () => {
   const { weather } = useWeather();
   const defaultLocation = [46.2044, 6.1432]; // Geneva coordinates default
-  
+
   const [position, setPosition] = useState(defaultLocation);
   const [activeLayer, setActiveLayer] = useState('precipitation_new');
   const [mapLoaded, setMapLoaded] = useState(false);
@@ -56,7 +56,7 @@ const RadarMap = () => {
 
   return (
     <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-6 h-[calc(100vh-80px)] flex flex-col relative z-10">
-      
+
       {/* Header & Precision Instruments Bar */}
       <div className="mb-6 flex flex-col md:flex-row md:justify-between md:items-end gap-4 z-20 relative">
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
@@ -73,7 +73,7 @@ const RadarMap = () => {
         </motion.div>
 
         {/* Precision Layer Controls - Desktop */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}
           className="hidden md:flex gap-1.5 luxury-panel p-1.5 rounded-2xl shadow-sm"
         >
@@ -83,11 +83,10 @@ const RadarMap = () => {
               <button
                 key={layer.id}
                 onClick={() => setActiveLayer(layer.id)}
-                className={`px-4 py-2 rounded-xl flex items-center gap-2 text-xs font-roman tracking-wider uppercase transition-all duration-300 border cursor-pointer ${
-                  isActive 
-                    ? 'bg-[#FAF5ED] border-[#B89758] text-[#8C6D3F] font-bold shadow-xs' 
-                    : 'text-[#6B5E51] hover:text-[#1C1917] hover:bg-white/60 border-transparent'
-                }`}
+                className={`px-4 py-2 rounded-xl flex items-center gap-2 text-xs font-roman tracking-wider uppercase transition-all duration-300 border cursor-pointer ${isActive
+                  ? 'bg-[#FAF5ED] border-[#B89758] text-[#8C6D3F] font-bold shadow-xs'
+                  : 'text-[#6B5E51] hover:text-[#1C1917] hover:bg-white/60 border-transparent'
+                  }`}
               >
                 <span className={isActive ? 'text-[#B89758]' : 'text-[#8C6D3F]'}>{layer.icon}</span>
                 {layer.name}
@@ -105,11 +104,10 @@ const RadarMap = () => {
             <button
               key={layer.id}
               onClick={() => setActiveLayer(layer.id)}
-              className={`whitespace-nowrap px-3.5 py-1.5 rounded-full flex items-center gap-1.5 text-xs font-roman uppercase tracking-wider transition-all border ${
-                isActive 
-                  ? 'bg-[#FAF5ED] border-[#B89758] text-[#8C6D3F] font-bold shadow-xs' 
-                  : 'bg-white/80 text-[#57493A] border-[#C5A880]/20'
-              }`}
+              className={`whitespace-nowrap px-3.5 py-1.5 rounded-full flex items-center gap-1.5 text-xs font-roman uppercase tracking-wider transition-all border ${isActive
+                ? 'bg-[#FAF5ED] border-[#B89758] text-[#8C6D3F] font-bold shadow-xs'
+                : 'bg-white/80 text-[#57493A] border-[#C5A880]/20'
+                }`}
             >
               {layer.icon}
               {layer.name}
@@ -119,9 +117,9 @@ const RadarMap = () => {
       </div>
 
       {/* Main Terminal Map Frame */}
-      <motion.div 
-        initial={{ opacity: 0, y: 20, scale: 0.98 }} 
-        animate={{ opacity: 1, y: 0, scale: 1 }} 
+      <motion.div
+        initial={{ opacity: 0, y: 20, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ delay: 0.3, duration: 0.8 }}
         className="flex-1 rounded-3xl overflow-hidden luxury-panel relative z-0 shadow-xl border border-[#C5A880]/35"
       >
@@ -134,19 +132,19 @@ const RadarMap = () => {
           </div>
         )}
 
-        <MapContainer 
-          center={position} 
-          zoom={10} 
+        <MapContainer
+          center={position}
+          zoom={10}
           style={{ height: '100%', width: '100%', background: '#F5EFEB' }}
           zoomControl={false}
           whenReady={() => setTimeout(() => setMapLoaded(true), 400)}
         >
           <ChangeView center={position} />
-          
-          {/* CartoDB Voyager: Exquisite Warm Ivory/Champagne Luxury Cartography */}
+
+
           <TileLayer
-            attribution='&copy; <a href="https://carto.com/">CartoDB</a>'
-            url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+            attribution='&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            url={`https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=${import.meta.env.VITE_CARTO_API_KEY}`}
           />
 
           {/* Dynamic Weather Layer from OpenWeather */}
@@ -167,7 +165,7 @@ const RadarMap = () => {
                 <div className="font-editorial font-bold text-lg text-[#1C1917] leading-tight mb-1">{weather?.name || "Target Vector"}</div>
                 {weather && (
                   <div className="flex items-center gap-2 text-xs text-[#57493A] font-medium pt-1 border-t border-[#C5A880]/20">
-                    <ThermometerSun className="w-3.5 h-3.5 text-[#C68A4C]"/>
+                    <ThermometerSun className="w-3.5 h-3.5 text-[#C68A4C]" />
                     {Math.round(weather.main?.temp)}°C · {weather.weather?.[0]?.description}
                   </div>
                 )}
@@ -175,12 +173,12 @@ const RadarMap = () => {
             </Popup>
           </Marker>
         </MapContainer>
-        
+
         {/* Floating Focus Point Plaque */}
         <div className="absolute bottom-6 left-6 z-[1000] pointer-events-none">
-          <motion.div 
-            initial={{ opacity: 0, y: 15 }} 
-            animate={{ opacity: 1, y: 0 }} 
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
             className="luxury-panel p-4 rounded-2xl shadow-lg flex items-center gap-3.5 pointer-events-auto border border-[#C5A880]/35"
           >
@@ -209,9 +207,10 @@ const RadarMap = () => {
         </div>
 
       </motion.div>
-      
+
       {/* Leaflet Custom Overrides */}
-      <style dangerouslySetInnerHTML={{__html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         .leaflet-container { font-family: 'Plus Jakarta Sans', sans-serif; }
         .leaflet-popup-content-wrapper { 
           background: rgba(255, 255, 255, 0.94); 
